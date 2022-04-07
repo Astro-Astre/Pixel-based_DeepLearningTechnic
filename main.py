@@ -42,7 +42,7 @@ if __name__ == "__main__":
     validation_data = DecalsDataset(annotations_file=VALIDATIONSET_TXT, transform=transfer)
     validation_loader = DataLoader(dataset=validation_data, batch_size=BATCH_SIZE,
                                    shuffle=False, num_workers=32, pin_memory=True)
-    createPkg(SAVE_PATH + "model/")
+    mkdir(SAVE_PATH + "model/")
     # modelPkg_name = SAVE_PATH + "model_auto/" + "densenet264_focal_2_5class/"
     modelPkg_name = SAVE_PATH + "model_auto/" + "xception_focal_adam_1_7class/"
     trainModel(modelPkg_name, flag=False, last_epoch=17, train_loader=train_loader, test_loader=test_loader,

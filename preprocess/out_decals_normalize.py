@@ -5,7 +5,7 @@ import multiprocessing
 
 def normalize_out_decals(i, rows):
     save_dir = "/data/renhaoye/decals_2022/out_decals/normalized_dat/"
-    createPkg(save_dir)
+    mkdir(save_dir)
     path = rows[i][0]
     save_name = save_dir + path.split("/")[-1].split(".fits")[0] + "raw.dat"
     if os.path.getsize(path) == 792000:
@@ -13,7 +13,7 @@ def normalize_out_decals(i, rows):
         img, remove = normalization(hdul[0].data)
         hdul.close()
         if not remove:
-            saveImg(img, save_name)
+            save_dat(img, save_name)
 
 
 if __name__ == '__main__':

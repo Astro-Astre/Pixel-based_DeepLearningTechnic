@@ -15,55 +15,55 @@ def generateTxt(txt_path, img_dir):
                 if label == "0":
                     img_path = os.path.join(i_dir, img_list[i])
                     line = img_path + " " + str(0) + "\n"
-                    zero+=1
+                    zero += 1
                     f.write(line)
                 if label == "1":
                     img_path = os.path.join(i_dir, img_list[i])
                     line = img_path + " " + str(1) + "\n"
                     f.write(line)
-                    one+=1
+                    one += 1
                 if label == "2":
                     img_path = os.path.join(i_dir, img_list[i])
                     line = img_path + " " + str(2) + "\n"
                     f.write(line)
-                    two+=1
+                    two += 1
                 if label == "3":
                     img_path = os.path.join(i_dir, img_list[i])
                     line = img_path + " " + str(3) + "\n"
                     f.write(line)
-                    three+=1
+                    three += 1
                 if label == "4":
                     img_path = os.path.join(i_dir, img_list[i])
                     line = img_path + " " + str(4) + "\n"
                     f.write(line)
-                    four+=1
+                    four += 1
                 if label == "5":
                     img_path = os.path.join(i_dir, img_list[i])
                     line = img_path + " " + str(4) + "\n"
                     f.write(line)
-                    four+=1
+                    four += 1
                 if label == "6":
                     img_path = os.path.join(i_dir, img_list[i])
                     line = img_path + " " + str(5) + "\n"
                     f.write(line)
-                    five+=1
+                    five += 1
                 if label == "7":
                     img_path = os.path.join(i_dir, img_list[i])
                     line = img_path + " " + str(5) + "\n"
                     f.write(line)
-                    five+=1
+                    five += 1
                 if label == "8":
                     img_path = os.path.join(i_dir, img_list[i])
                     line = img_path + " " + str(5) + "\n"
                     f.write(line)
-                    five+=1
+                    five += 1
                 if label == "9":
                     img_path = os.path.join(i_dir, img_list[i])
                     line = img_path + " " + str(6) + "\n"
                     f.write(line)
-                    six+=1
+                    six += 1
     f.close()
-    print(zero,one,two,three,four,five,six)
+    print(zero, one, two, three, four, five, six)
 
 
 if __name__ == '__main__':

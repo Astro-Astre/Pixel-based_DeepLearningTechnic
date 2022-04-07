@@ -37,7 +37,7 @@ def trainModel(model_pkg, flag, last_epoch, train_loader, test_loader, validatio
     device = "cuda"
     model = nn.DataParallel(model)
     model.to(device)
-    createPkg(model_pkg)
+    mkdir(model_pkg)
     weight = [54528 / 23136, 54528 / 30435, 54528 / 17196, 54528 / 21237, 54528 / 22099, 54528 / 54528, 54528 / 12928]
     # criterion = nn.CrossEntropyLoss()  # loss function
     criterion = focal_loss(alpha=weight, gamma=2, num_classes=7)
@@ -55,7 +55,7 @@ def trainModel(model_pkg, flag, last_epoch, train_loader, test_loader, validatio
         print('start epoch: ', last_epoch + 1)
 
     print("Hello training!")
-    createPkg(model_pkg + "log/")
+    mkdir(model_pkg + "log/")
     writer = torch.utils.tensorboard.SummaryWriter(model_pkg + "log/")
     for epoch in range(start + 1, EPOCHES):
         train_loss = 0
@@ -79,9 +79,9 @@ def trainModel(model_pkg, flag, last_epoch, train_loader, test_loader, validatio
             # print(prof.key_averages().table(sort_by="gpu_time_total", row_limit=10))
         writer.add_scalar('Training loss by steps', train_loss / len(train_loader), epoch)
         writer.add_scalar('Training accuracy by steps', train_acc / len(train_loader), epoch)
-        writer.add_figure("Confusion matrix", createConfusionMatrix(train_loader,
-                                                                    model, "/data/renhaoye/Decals/1.png",
-                                                                    False), epoch)
+        writer.add_figure("Confusion matrix", cf_metrics(train_loader,
+                                                         model, "/data/renhaoye/Decals/1.png",
+                                                         False), epoch)
         losses.append(train_loss / len(train_loader))
         acces.append(100 * train_acc / len(train_loader))
         print("epoch: ", epoch)
@@ -104,7 +104,7 @@ def trainModel(model_pkg, flag, last_epoch, train_loader, test_loader, validatio
             acc = int(num_correct) / X.shape[0]
             eval_acc += acc
         writer.add_figure("Confusion matrix valid",
-                          createConfusionMatrix(validation_loader, model, "/data/renhaoye/Decals/1.png", False),
+                          cf_metrics(validation_loader, model, "/data/renhaoye/Decals/1.png", False),
                           epoch)
         eval_losses.append(eval_loss / len(test_loader))
         eval_acces.append(eval_acc / len(test_loader))
@@ -117,6 +117,6 @@ def trainModel(model_pkg, flag, last_epoch, train_loader, test_loader, validatio
             'optimizer': optimizer.state_dict(),
             "epoch": epoch
         }
-        createPkg('%s/checkpoint' % model_pkg)
+        mkdir('%s/checkpoint' % model_pkg)
         torch.save(checkpoint, '%s/checkpoint/ckpt_best_%s.pth' % (model_pkg, str(epoch)))
         torch.save(model, '%s/model_%d.model' % (model_pkg, epoch))

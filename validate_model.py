@@ -19,8 +19,8 @@ def predict(model_name, valid: bool = True, t=0):
     device = torch.device("cuda:0")
     model = model.to(device)
     model.eval()
-    createConfusionMatrix(validation_loader, model,
-                          "/data/renhaoye/decals_2022/model_%d.png" %t, valid)
+    cf_metrics(validation_loader, model,
+                          "/data/renhaoye/decals_2022/model_%d.png" % t, valid)
 
 
 if __name__ == '__main__':

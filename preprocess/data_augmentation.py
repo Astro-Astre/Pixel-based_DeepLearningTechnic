@@ -8,7 +8,7 @@ from tqdm import tqdm
 import numpy as np
 import multiprocessing
 
-SAVE_PATH = "/data/renhaoye/Decals/"  # the head of the directory to save
+SAVE_PATH = "/data/renhaoye/decals_2022/"  # the head of the directory to save
 PIXEL = 5
 DEGREE = 30
 
@@ -72,7 +72,7 @@ def flip(img, save_dir):
     output = Img(img, height, width, [0, 0])
     output.Flip()
     output.Process()
-    saveImg(output.dst, save_dir + "_flipped.dat")
+    save_dat(output.dst, save_dir + "_flipped.dat")
 
 
 def rotate(img, save_dir):
@@ -81,7 +81,7 @@ def rotate(img, save_dir):
     output = Img(img, height, width, [height / 2, width / 2])
     output.Rotate(seed)
     output.Process()
-    saveImg(output.dst, save_dir + "_rotated.dat")
+    save_dat(output.dst, save_dir + "_rotated.dat")
 
 
 def shift(img, save_dir, pixel):
@@ -89,7 +89,7 @@ def shift(img, save_dir, pixel):
     output = Img(img, height, width, [0, 0])
     output.Shift(pixel, 0)
     output.Process()
-    saveImg(output.dst, save_dir + "_shifted.dat")
+    save_dat(output.dst, save_dir + "_shifted.dat")
 
 
 def augmentation(i, rows):
@@ -97,7 +97,7 @@ def augmentation(i, rows):
     path = rows[i][-2]
     agtn = rows[i][-1] in ["0", "4", "7", "8", "9"]
     save_dir = SAVE_PATH + "augmentation_auto/" + label + "/"
-    createPkg(save_dir)
+    mkdir(save_dir)
     save_name = save_dir + path.split("/")[-1].split(".fits")[0]
     if os.path.getsize(path) == 792000:
         hdul = fits.open(path)
