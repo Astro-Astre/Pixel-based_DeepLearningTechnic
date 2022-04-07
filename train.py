@@ -14,12 +14,12 @@ from models.dense_net import *
 from models.swin_transformer import *
 
 torch.manual_seed(1926)  # 设置随机数种子，确保结果可重复
-BATCH_SIZE = 16  # 批处理大小
+BATCH_SIZE = 64  # 批处理大小
 LEARNING_RATE = 0.0001  # 学习率
 CLASSES = 7
 EPOCHES = 150  # 训练次数
 MOMENTUM = 0.9
-SAVE_PATH = "/data/renhaoye/Decals/"  # the head of the directory to save
+SAVE_PATH = "/data/renhaoye/decals_2022/"  # the head of the directory to save
 
 
 # noinspection PyUnresolvedReferences
@@ -31,11 +31,11 @@ def trainModel(model_pkg, flag, last_epoch, train_loader, test_loader, validatio
     # model = denseNet121Decals()
     # model = denseNet169Decals()
     # model = denseNet201Decals()
-    # model = denseNet264Decals()
+    model = denseNet264Decals()
     # model = Swin_T(10)
-    model = xception(7)
-    device = "cuda"
-    model = nn.DataParallel(model)
+    # model = x_ception(7)
+    device = "cuda:0"
+    # model = nn.DataParallel(model)
     model.to(device)
     mkdir(model_pkg)
     weight = [54528 / 23136, 54528 / 30435, 54528 / 17196, 54528 / 21237, 54528 / 22099, 54528 / 54528, 54528 / 12928]
@@ -80,7 +80,7 @@ def trainModel(model_pkg, flag, last_epoch, train_loader, test_loader, validatio
         writer.add_scalar('Training loss by steps', train_loss / len(train_loader), epoch)
         writer.add_scalar('Training accuracy by steps', train_acc / len(train_loader), epoch)
         writer.add_figure("Confusion matrix", cf_metrics(train_loader,
-                                                         model, "/data/renhaoye/Decals/1.png",
+                                                         model, "/data/renhaoye/decals_2022/1.png",
                                                          False), epoch)
         losses.append(train_loss / len(train_loader))
         acces.append(100 * train_acc / len(train_loader))
@@ -92,19 +92,20 @@ def trainModel(model_pkg, flag, last_epoch, train_loader, test_loader, validatio
         eval_acces = []
         eval_loss = 0
         eval_acc = 0
-        model.eval()  # 模型转化为评估模式
-        for X, label in test_loader:
-            label = torch.as_tensor(label, dtype=torch.long)
-            X, label = X.to(device), label.to(device)
-            test_out = model(X)
-            test_loss = criterion(test_out, label)
-            eval_loss += float(test_loss)
-            _, pred = test_out.max(1)
-            num_correct = (pred == label).sum()
-            acc = int(num_correct) / X.shape[0]
-            eval_acc += acc
+        with torch.no_grad():
+            model.eval()
+            for X, label in test_loader:
+                label = torch.as_tensor(label, dtype=torch.long)
+                X, label = X.to(device), label.to(device)
+                test_out = model(X)
+                test_loss = criterion(test_out, label)
+                eval_loss += float(test_loss)
+                _, pred = test_out.max(1)
+                num_correct = (pred == label).sum()
+                acc = int(num_correct) / X.shape[0]
+                eval_acc += acc
         writer.add_figure("Confusion matrix valid",
-                          cf_metrics(validation_loader, model, "/data/renhaoye/Decals/1.png", False),
+                          cf_metrics(validation_loader, model, "/data/renhaoye/decals_2022/1.png", False),
                           epoch)
         eval_losses.append(eval_loss / len(test_loader))
         eval_acces.append(eval_acc / len(test_loader))

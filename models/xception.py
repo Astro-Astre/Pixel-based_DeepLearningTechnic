@@ -39,10 +39,11 @@ class SeperableConv2d(nn.Module):
 # noinspection PyTypeChecker
 class EntryFlow(nn.Module):
 
-    def __init__(self):
+    def __init__(self, num_init_channels):
         super().__init__()
+        self.num_init_channels = num_init_channels
         self.conv1 = nn.Sequential(
-            nn.Conv2d(3, 32, 3, padding=1, bias=False),
+            nn.Conv2d(num_init_channels, 32, 3, padding=1, bias=False),
             nn.BatchNorm2d(32),
             nn.ReLU(inplace=True)
         )
@@ -208,9 +209,10 @@ class ExitFLow(nn.Module):
 
 class Xception(nn.Module):
 
-    def __init__(self, block, num_class=7):
+    def __init__(self, num_init_channels, block, num_class=7):
         super().__init__()
-        self.entry_flow = EntryFlow()
+        self.num_init_channels = num_init_channels
+        self.entry_flow = EntryFlow(num_init_channels)
         self.middel_flow = MiddleFlow(block)
         self.exit_flow = ExitFLow()
 
@@ -226,9 +228,8 @@ class Xception(nn.Module):
         return x
 
 
-def x_ception(num_class):
-    return Xception(MiddleFLowBlock, num_class=num_class)
-
+def x_ception(num_init_channels, num_class):
+    return Xception(block= MiddleFLowBlock, num_init_channels=num_init_channels, num_class=num_class)
 
 # if __name__ == '__main__':
 #     models = xception(7)

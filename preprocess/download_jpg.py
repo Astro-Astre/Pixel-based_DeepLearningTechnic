@@ -51,10 +51,18 @@ if __name__ == '__main__':
     for i in tqdm(range(len(total))):
         # for i in range(1):
         urls.append(get_url(total.iloc[i, 0], total.iloc[i, 1]))  # 0是ra，1是dec
-    p = multiprocessing.Pool(processes=20)  # 进to程池
-    _ = [p.apply_async(func=download_file, args=(i,)) for i in urls]
-    p.close()
-    p.join()
+    # with open("/data/renhaoye/decals_2022/jpg_decals_urls.txt", "w") as f:
+    #     for url in urls:
+    #         f.write(url + "\n")
+
+    # p = multiprocessing.Pool(processes=4)  # 进to程池
+    # _ = [p.apply_async(func=download_file, args=(i,)) for i in urls]
+    # p.close()
+    # p.join()
+
+    for i in tqdm(range(len(urls))):
+        download_file(urls[i])
+
     # index = []
     # for i in range(len(urls)):
     #     index.append(i)

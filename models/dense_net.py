@@ -143,6 +143,7 @@ class DenseNet(nn.Module):
 
     def __init__(
             self,
+            num_init_channels: int = 3,
             growth_rate: int = 32,
             block_config: Tuple[int, int, int, int] = (6, 12, 24, 16),
             num_init_features: int = 64,
@@ -158,7 +159,7 @@ class DenseNet(nn.Module):
         self.features = nn.Sequential(
             OrderedDict(
                 [
-                    ("conv0", nn.Conv2d(3, num_init_features, kernel_size=7, stride=2, padding=3, bias=False)),
+                    ("conv0", nn.Conv2d(num_init_channels, num_init_features, kernel_size=7, stride=2, padding=3, bias=False)),
                     ("norm0", nn.BatchNorm2d(num_init_features)),
                     ("relu0", nn.ReLU(inplace=True)),
                     ("pool0", nn.MaxPool2d(kernel_size=3, stride=2, padding=1)),
@@ -213,31 +214,51 @@ class DenseNet(nn.Module):
 
 
 def _densenet(
+        num_init_channels: int,
         growth_rate: int,
         block_config: Tuple[int, int, int, int],
         classes: int,
         num_init_features: int,
         **kwargs: Any,
 ) -> DenseNet:
-    model = DenseNet(growth_rate, block_config, num_init_features, num_classes=classes, **kwargs)
+    model = DenseNet(num_init_channels, growth_rate, block_config, num_init_features, num_classes=classes, **kwargs)
     return model
 
 
 def denseNet121Decals(progress: bool = True, **kwargs: Any) -> DenseNet:
-    return _densenet(growth_rate=16, block_config=(6, 12, 24, 16),
+    return _densenet(num_init_channels=3, growth_rate=16, block_config=(6, 12, 24, 16),
                      classes=7, num_init_features=64, **kwargs)
 
 
 def denseNet169Decals(progress: bool = True, **kwargs: Any) -> DenseNet:
-    return _densenet(growth_rate=16, block_config=(6, 12, 32, 32),
+    return _densenet(num_init_channels=3, growth_rate=16, block_config=(6, 12, 32, 32),
                      classes=7, num_init_features=64, **kwargs)
 
 
 def denseNet201Decals(progress: bool = True, **kwargs: Any) -> DenseNet:
-    return _densenet(growth_rate=16, block_config=(6, 12, 48, 32),
+    return _densenet(num_init_channels=3, growth_rate=16, block_config=(6, 12, 48, 32),
                      classes=7, num_init_features=64, **kwargs)
 
 
 def denseNet264Decals(progress: bool = True, **kwargs: Any) -> DenseNet:
-    return _densenet(growth_rate=16, block_config=(6, 12, 64, 48),
+    return _densenet(num_init_channels=3, growth_rate=16, block_config=(6, 12, 64, 48),
+                     classes=7, num_init_features=32, **kwargs)
+
+def denseNet121Decals_masked(progress: bool = True, **kwargs: Any) -> DenseNet:
+    return _densenet(num_init_channels=4, growth_rate=16, block_config=(6, 12, 24, 16),
+                     classes=7, num_init_features=64, **kwargs)
+
+
+def denseNet169Decals_masked(progress: bool = True, **kwargs: Any) -> DenseNet:
+    return _densenet(num_init_channels=4, growth_rate=16, block_config=(6, 12, 32, 32),
+                     classes=7, num_init_features=64, **kwargs)
+
+
+def denseNet201Decals_masked(progress: bool = True, **kwargs: Any) -> DenseNet:
+    return _densenet(num_init_channels=4, growth_rate=16, block_config=(6, 12, 48, 32),
+                     classes=7, num_init_features=64, **kwargs)
+
+
+def denseNet264Decals_masked(progress: bool = True, **kwargs: Any) -> DenseNet:
+    return _densenet(num_init_channels=4, growth_rate=16, block_config=(6, 12, 64, 48),
                      classes=7, num_init_features=32, **kwargs)

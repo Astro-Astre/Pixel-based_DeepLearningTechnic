@@ -2,7 +2,7 @@ from train import *
 from train import SAVE_PATH, BATCH_SIZE
 from torch.utils.data import DataLoader
 from decals_dataset import *
-from dataHandle import *
+from preprocess.data_handle import *
 import torchvision.transforms as transforms
 
 transfer = transforms.Compose([
@@ -35,15 +35,15 @@ if __name__ == "__main__":
 
     train_data = DecalsDataset(annotations_file=TRAININGSET_TXT, transform=transfer)
     train_loader = DataLoader(dataset=train_data, batch_size=BATCH_SIZE,
-                              shuffle=True, num_workers=32, pin_memory=True)
+                              shuffle=True, num_workers=20, pin_memory=True)
     test_data = DecalsDataset(annotations_file=TESTSET_TXT, transform=transfer)
     test_loader = DataLoader(dataset=test_data, batch_size=BATCH_SIZE,
-                             shuffle=True, num_workers=32, pin_memory=True)
+                             shuffle=True, num_workers=20, pin_memory=True)
     validation_data = DecalsDataset(annotations_file=VALIDATIONSET_TXT, transform=transfer)
     validation_loader = DataLoader(dataset=validation_data, batch_size=BATCH_SIZE,
-                                   shuffle=False, num_workers=32, pin_memory=True)
+                                   shuffle=False, num_workers=20, pin_memory=True)
     mkdir(SAVE_PATH + "model/")
     # modelPkg_name = SAVE_PATH + "model_auto/" + "densenet264_focal_2_5class/"
-    modelPkg_name = SAVE_PATH + "model_auto/" + "xception_focal_adam_1_7class/"
+    modelPkg_name = SAVE_PATH + "trained_model/" + "densenet_control/"
     trainModel(modelPkg_name, flag=False, last_epoch=17, train_loader=train_loader, test_loader=test_loader,
                validation_loader=validation_loader)

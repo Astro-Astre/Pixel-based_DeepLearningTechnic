@@ -85,8 +85,10 @@ def save_dat(object, dir):
 def cf_metrics(loader, model, save_path, save: bool = False):
     y_pred = []  # save predction
     y_true = []  # save ground truth
+    device = "cuda:0"
     # iterate over data
     for inputs, labels in loader:
+        inputs, labels = inputs.to(device), labels.to(device)
         output = model(inputs)  # Feed Network
         output = (torch.max(torch.exp(output), 1)[1]).data.cpu().numpy()
         y_pred.extend(output)  # save prediction

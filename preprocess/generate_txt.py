@@ -67,9 +67,9 @@ def generateTxt(txt_path, img_dir):
 
 
 if __name__ == '__main__':
-    generateTxt("/data/renhaoye/Decals/training_auto_7.txt",
-                "/data/renhaoye/Decals/dataset_auto/trainingSet")
-    generateTxt("/data/renhaoye/Decals/test_auto_7.txt",
-                "/data/renhaoye/Decals/dataset_auto/testSet")
-    generateTxt("/data/renhaoye/Decals/validation_auto_7.txt",
-                "/data/renhaoye/Decals/dataset_auto/validationSet")
+    generateTxt("/data/renhaoye/decals_2022/training_multimask_7.txt",
+                "/data/renhaoye/decals_2022/in_decals/dataset/trainingSet")
+    generateTxt("/data/renhaoye/decals_2022/test_multimask_7.txt",
+                "/data/renhaoye/decals_2022/in_decals/dataset/testSet")
+    generateTxt("/data/renhaoye/decals_2022/validation_multimask_7.txt",
+                "/data/renhaoye/decals_2022/in_decals/dataset/validationSet")
