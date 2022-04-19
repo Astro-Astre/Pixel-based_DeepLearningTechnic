@@ -1,5 +1,5 @@
 import csv
-from data_handle import *
+from preprocess.data_handle import *
 from astropy.io import fits
 import random
 from functools import partial
@@ -72,7 +72,7 @@ def flip(img, save_dir):
     output = Img(img, height, width, [0, 0])
     output.Flip()
     output.Process()
-    save_dat(output.dst, save_dir + "_flipped.dat")
+    save_fits(output.dst, save_dir + "_flipped.fits")
 
 
 def rotate(img, save_dir):
@@ -81,7 +81,7 @@ def rotate(img, save_dir):
     output = Img(img, height, width, [height / 2, width / 2])
     output.Rotate(seed)
     output.Process()
-    save_dat(output.dst, save_dir + "_rotated.dat")
+    save_fits(output.dst, save_dir + "_rotated.fits")
 
 
 def shift(img, save_dir, pixel):
@@ -89,40 +89,65 @@ def shift(img, save_dir, pixel):
     output = Img(img, height, width, [0, 0])
     output.Shift(pixel, 0)
     output.Process()
-    save_dat(output.dst, save_dir + "_shifted.dat")
+    save_fits(output.dst, save_dir + "_shifted.fits")
 
 
 def augmentation(i, rows):
-    label = rows[i][-1]
-    path = rows[i][-2]
-    agtn = rows[i][-1] in ["0", "4", "7", "8", "9"]
-    save_dir = SAVE_PATH + "augmentation_auto/" + label + "/"
-    mkdir(save_dir)
-    save_name = save_dir + path.split("/")[-1].split(".fits")[0]
-    if os.path.getsize(path) == 792000:
-        hdul = fits.open(path)
-        img, remove = normalization(hdul[0].data)
-        hdul.close()
-        if not remove:
-            # saveImg(img, save_name + '_raw.dat')
-            if agtn:
-                # flip(img, save_name)
-                # shift(img, save_name, PIXEL)
-                rotate(img, save_name)
+    dst_dir = SAVE_PATH + "in_decals/augmentation_all/"    # 目标存放文件夹
+    img_name = rows[i][1] + "_" + rows[i][2]    # 图像名：ra_dec
+    src_dir = "/data/renhaoye/decals_2022/in_decals/fits/"  # 原始路径
+    src_name = src_dir + img_name + ".fits"     # 原始图片绝对路径
+    save_name = dst_dir + img_name  # 保存绝对路径 不带扩展名
+    if not os.path.exists(save_name + ".fits"):
+        hdul = fits.open(src_name)  # 打开fits文件
+        normalized_unlock = normalization(hdul[0].data, shape="CHW", lock=False)    # 先做一次分通道归一化
+        if not type(normalized_unlock) == int:
+            normalized_lock = normalization(normalized_unlock, shape="CHW", lock=True)  # 再做一次全通道归一化
+            if not type(normalized_lock) == int:
+                scaled = auto_scale(normalized_lock)    # 再做stf
+                hdul.close()
+                save_fits(scaled, save_name + '.fits')
+                flip(scaled, save_name)
+                shift(scaled, save_name, PIXEL)
+                rotate(scaled, save_name)
+            else:
+                os.system("mv %s /data/renhaoye/decals_2022/in_decals/fits_deleted/" % src_name)
+        else:
+            os.system("mv %s /data/renhaoye/decals_2022/in_decals/fits_deleted/" % src_name)
+
+# def augmentation(i, rows):
+#     label = rows[i][-1]
+#     path = rows[i][-2]
+#     agtn = rows[i][-1] in ["0", "4", "7", "8", "9"]
+#     save_dir = SAVE_PATH + "augmentation_auto/" + label + "/"
+#     mkdir(save_dir)
+#     save_name = save_dir + path.split("/")[-1].split(".fits")[0]
+#     if os.path.getsize(path) == 792000:
+#         hdul = fits.open(path)
+#         img, remove = normalization(hdul[0].data)
+#         hdul.close()
+#         if not remove:
+#             # saveImg(img, save_name + '_raw.dat')
+#             if agtn:
+#                 # flip(img, save_name)
+#                 # shift(img, save_name, PIXEL)
+#                 rotate(img, save_name)
 
 
 if __name__ == "__main__":
-    with open("/data/renhaoye/Decals/label_auto_beforeAugmentation.csv", "r") as r:
+    # with open("/data/renhaoye/Decals/label_auto_beforeAugmentation.csv", "r") as r:
+    with open("/data/renhaoye/decals_2022/fits.csv", "r") as r:
         reader = csv.reader(r)
         title = next(reader)
         rows = [row for row in reader]
-        for i in tqdm(range(len(rows))):
-        # # for i in tqdm(range(1)):
-            augmentation(i, rows)
-        # index = []
-        # for i in range(len(rows)):
-        #     index.append(i)
-        # p = multiprocessing.Pool(25)
-        # p.map(partial(augmentation, rows=rows), index)
-        # p.close()
-        # p.join()
+        # print(rows[1])
+        # # for i in tqdm(range(len(rows))):
+        # for i in tqdm(range(1)):
+        #     augmentation(i, rows)
+        index = []
+        for i in range(len(rows)):
+            index.append(i)
+        p = multiprocessing.Pool(20)
+        p.map(partial(augmentation, rows=rows), index)
+        p.close()
+        p.join()

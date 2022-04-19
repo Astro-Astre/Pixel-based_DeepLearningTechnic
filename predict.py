@@ -22,7 +22,7 @@ def predict(model_name, dir):
         writer.writerow(["loc", "label", "time_cost"])
         for file in img_dir:
             line = [dir + file]
-            img = load_dat(dir + file, transfer)
+            img = load_img(dir + file, transfer)
             start = time.time()
             out = model(img.to(device).unsqueeze(0))
             _, pred = out.max(1)

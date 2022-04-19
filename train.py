@@ -38,7 +38,10 @@ def trainModel(model_pkg, flag, last_epoch, train_loader, test_loader, validatio
     # model = nn.DataParallel(model)
     model.to(device)
     mkdir(model_pkg)
-    weight = [54528 / 23136, 54528 / 30435, 54528 / 17196, 54528 / 21237, 54528 / 22099, 54528 / 54528, 54528 / 12928]
+    # weight = [54528 / 23136, 54528 / 30435, 54528 / 17196, 54528 / 21237, 54528 / 22099, 54528 / 54528, 54528 / 12928]
+    # weight = [34101 / 23424, 34101 / 24737, 34101 / 26559, 34101 / 21502, 34101 / 12879, 34101 / 34101, 34101 / 13088]
+    weight = [1 - (23424 / 156290), 1 - (24737 / 156290), 1 - (26559 / 156290), 1 - (21502 / 156290),
+              1 - (12879 / 156290), 1 - (34101 / 156290), 1 - (13088 / 156290)]
     # criterion = nn.CrossEntropyLoss()  # loss function
     criterion = focal_loss(alpha=weight, gamma=2, num_classes=7)
     # optimizer = optim.SGD(model.parameters(), lr=LEARNING_RATE, momentum=MOMENTUM)
@@ -46,7 +49,7 @@ def trainModel(model_pkg, flag, last_epoch, train_loader, test_loader, validatio
     losses = []  # a list of train_loss
     acces = []  # a list of train_acc
     start = -1
-    if flag:    # flag = True continue training
+    if flag:  # flag = True continue training
         path_checkpoint = '%s/checkpoint/ckpt_best_%d.pth' % (model_pkg, last_epoch)  # 断点路径
         checkpoint = torch.load(path_checkpoint)  # 加载断点
         model.load_state_dict(checkpoint['net'])  # 加载模型可学习参数
