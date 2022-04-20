@@ -1,7 +1,7 @@
 from preprocess.data_handle import *
 from train import *
 from decals_dataset import *
-from models.xception import x_ception
+from models.Xception import x_ception
 import pandas as pd
 import time
 

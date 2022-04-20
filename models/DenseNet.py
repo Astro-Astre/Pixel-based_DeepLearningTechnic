@@ -1,14 +1,13 @@
 # -*- coding: utf-8-*-
 from torch import nn
-import torch
 import torch.nn.functional as F
 from collections import OrderedDict
 from typing import Any, List, Tuple
 import torch.utils.checkpoint as cp
 from torch import Tensor
+from args import *
 
 
-# noinspection PyTypeChecker
 class _DenseLayer(nn.Module):
     def __init__(
             self, num_input_features: int, growth_rate: int,
@@ -159,7 +158,8 @@ class DenseNet(nn.Module):
         self.features = nn.Sequential(
             OrderedDict(
                 [
-                    ("conv0", nn.Conv2d(num_init_channels, num_init_features, kernel_size=7, stride=2, padding=3, bias=False)),
+                    ("conv0",
+                     nn.Conv2d(num_init_channels, num_init_features, kernel_size=7, stride=2, padding=3, bias=False)),
                     ("norm0", nn.BatchNorm2d(num_init_features)),
                     ("relu0", nn.ReLU(inplace=True)),
                     ("pool0", nn.MaxPool2d(kernel_size=3, stride=2, padding=1)),
@@ -224,42 +224,22 @@ def _densenet(
     model = DenseNet(num_init_channels, growth_rate, block_config, num_init_features, num_classes=classes, **kwargs)
     return model
 
-NUM_CLASS = 9
 
-def denseNet121Decals(progress: bool = True, **kwargs: Any) -> DenseNet:
-    return _densenet(num_init_channels=3, growth_rate=16, block_config=(6, 12, 24, 16),
-                     classes=NUM_CLASS, num_init_features=64, **kwargs)
-
-
-def denseNet169Decals(progress: bool = True, **kwargs: Any) -> DenseNet:
-    return _densenet(num_init_channels=3, growth_rate=16, block_config=(6, 12, 32, 32),
-                     classes=NUM_CLASS, num_init_features=64, **kwargs)
+def denseNet121(progress: bool = True, **kwargs: Any) -> DenseNet:
+    return _densenet(num_init_channels=data_config.input_channel, growth_rate=32, block_config=(6, 12, 24, 16),
+                     classes=data_config.num_class, num_init_features=64, **kwargs)
 
 
-def denseNet201Decals(progress: bool = True, **kwargs: Any) -> DenseNet:
-    return _densenet(num_init_channels=3, growth_rate=16, block_config=(6, 12, 48, 32),
-                     classes=NUM_CLASS, num_init_features=64, **kwargs)
+def denseNet169(progress: bool = True, **kwargs: Any) -> DenseNet:
+    return _densenet(num_init_channels=data_config.input_channel, growth_rate=32, block_config=(6, 12, 32, 32),
+                     classes=data_config.num_class, num_init_features=64, **kwargs)
 
 
-def denseNet264Decals(progress: bool = True, **kwargs: Any) -> DenseNet:
-    return _densenet(num_init_channels=3, growth_rate=16, block_config=(6, 12, 64, 48),
-                     classes=NUM_CLASS, num_init_features=32, **kwargs)
-
-def denseNet121Decals_masked(progress: bool = True, **kwargs: Any) -> DenseNet:
-    return _densenet(num_init_channels=4, growth_rate=16, block_config=(6, 12, 24, 16),
-                     classes=NUM_CLASS, num_init_features=64, **kwargs)
+def denseNet201(progress: bool = True, **kwargs: Any) -> DenseNet:
+    return _densenet(num_init_channels=data_config.input_channel, growth_rate=32, block_config=(6, 12, 48, 32),
+                     classes=data_config.num_class, num_init_features=64, **kwargs)
 
 
-def denseNet169Decals_masked(progress: bool = True, **kwargs: Any) -> DenseNet:
-    return _densenet(num_init_channels=4, growth_rate=16, block_config=(6, 12, 32, 32),
-                     classes=NUM_CLASS, num_init_features=64, **kwargs)
-
-
-def denseNet201Decals_masked(progress: bool = True, **kwargs: Any) -> DenseNet:
-    return _densenet(num_init_channels=4, growth_rate=16, block_config=(6, 12, 48, 32),
-                     classes=NUM_CLASS, num_init_features=64, **kwargs)
-
-
-def denseNet264Decals_masked(progress: bool = True, **kwargs: Any) -> DenseNet:
-    return _densenet(num_init_channels=4, growth_rate=16, block_config=(6, 12, 64, 48),
-                     classes=NUM_CLASS, num_init_features=32, **kwargs)
+def denseNet264(progress: bool = True, **kwargs: Any) -> DenseNet:
+    return _densenet(num_init_channels=data_config.input_channel, growth_rate=32, block_config=(6, 12, 64, 48),
+                     classes=data_config.num_class, num_init_features=32, **kwargs)

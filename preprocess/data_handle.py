@@ -1,3 +1,4 @@
+from args import *
 import datetime
 import os
 import pickle
@@ -9,6 +10,16 @@ from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
 from astropy.io import fits
 import torchvision.transforms as transforms
+import random
+
+
+def get_weight(num_samples: list):
+    sum = 0
+    for i in num_samples:
+        sum += i
+    for i in range(len(num_samples)):
+        num_samples[i] = 1 - num_samples[i] / sum
+    return num_samples
 
 
 def changeAxis(data: np.ndarray):
@@ -20,20 +31,12 @@ def changeAxis(data: np.ndarray):
     return img
 
 
-# def load_img(filename):
-#     """
-#     加载图像，dat和fits均支持，不过仅支持CxHxW
-#     :param filename: 传入文件名，应当为CHW
-#     :return: 返回CHW的ndarray
-#     """
-#     if ".fits" in filename:
-#         with fits.open(filename) as hdul:
-#             return hdul[0].data
-#     elif ".dat" in filename:
-#         with open(filename, "rb") as f:
-#             return pickle.load(f)
-#     else:
-#         raise TypeError
+def init_rand_seed(rand_seed):
+    torch.manual_seed(rand_seed)
+    torch.cuda.manual_seed_all(rand_seed)
+    np.random.seed(rand_seed)
+    random.seed(rand_seed)
+    # torch.backends.cudnn.deterministic = True # 这个可能会导致训练过程非常慢
 
 
 def normalization(img: np.ndarray, shape: str, lock: bool):
@@ -108,96 +111,96 @@ def write2fits(data: np.ndarray, filename: str):
         raise RuntimeError
 
 
-def color_balance(img: np.ndarray, shape: str, region: str, kernel_size: list = [60, 60]):
-    """
-    三通道直方图平衡
-    :param img: 输入图像，CHW和HWC均可，需要在shape中输入
-    :param kernel_size: 核大小，长宽不必相同
-    :param shape: 应当为CHW或HWC
-    :param region: 全局模式则输入global，否则输入kernel使用中心核模式，无默认大小
-    :return: 根据输入shape返回对应形式的ndarray
-    """
-    if region == "global":
-        if shape == "CHW" or shape == "chw":
-            r, g, b = img[0], img[1], img[2]
-            R, G, B = np.mean(r), np.mean(g), np.mean(b)
-            K = (R + G + B) / 3
-            Kr, Kg, Kb = K / R, K / G, K / B
-            return np.array((Kr * r, Kg * g, Kb * b))
-        elif shape == "HWC" or shape == "hwc":
-            r, g, b = img[:, :, 0], img[:, :, 1], img[:, :, 2]
-            R, G, B = np.mean(r), np.mean(g), np.mean(b)
-            K = (R + G + B) / 3
-            Kr, Kg, Kb = K / R, K / G, K / B
-            return np.concatenate(
-                (Kr * r.reshape(256, 256, 1), Kg * g.reshape(256, 256, 1), Kb * b.reshape(256, 256, 1)), axis=2)
-        else:
-            raise RuntimeError
-    elif region == "kernel":
-        h_k, w_k = kernel_size[0], kernel_size[1]  # 核的长宽
-        h, w = img[0].shape  # 图像长（纵向）宽（横向）
-        h_l, h_r = int(h / 2) - h_k, int(h / 2) + h_k
-        w_l, w_r = int(w / 2) - w_k, int(w / 2) + w_k
-        r, g, b = img[0], img[1], img[2]
-        r_kernel, g_kernel, b_kernel = img[0, h_l:h_r, w_l: w_r], img[1, h_l:h_r, w_l: w_r], img[2, h_l:h_r, w_l: w_r]
-        R, G, B = np.mean(r_kernel), np.mean(g_kernel), np.mean(b_kernel)
-        K = (R + G + B) / 3
-        Kr, Kg, Kb = K / R, K / G, K / B
-        if shape == "CHW" or shape == "chw":
-            return np.array((Kr * r, Kg * g, Kb * b))
-        elif shape == "HWC" or shape == "hwc":
-            return np.concatenate(
-                (Kr * r.reshape(256, 256, 1), Kg * g.reshape(256, 256, 1), Kb * b.reshape(256, 256, 1)), axis=2)
-        else:
-            raise RuntimeError
-    else:
-        raise RuntimeError
+# def color_balance(img: np.ndarray, shape: str, region: str, kernel_size: list = [60, 60]):
+#     """
+#     三通道直方图平衡
+#     :param img: 输入图像，CHW和HWC均可，需要在shape中输入
+#     :param kernel_size: 核大小，长宽不必相同
+#     :param shape: 应当为CHW或HWC
+#     :param region: 全局模式则输入global，否则输入kernel使用中心核模式，无默认大小
+#     :return: 根据输入shape返回对应形式的ndarray
+#     """
+#     if region == "global":
+#         if shape == "CHW" or shape == "chw":
+#             r, g, b = img[0], img[1], img[2]
+#             R, G, B = np.mean(r), np.mean(g), np.mean(b)
+#             K = (R + G + B) / 3
+#             Kr, Kg, Kb = K / R, K / G, K / B
+#             return np.array((Kr * r, Kg * g, Kb * b))
+#         elif shape == "HWC" or shape == "hwc":
+#             r, g, b = img[:, :, 0], img[:, :, 1], img[:, :, 2]
+#             R, G, B = np.mean(r), np.mean(g), np.mean(b)
+#             K = (R + G + B) / 3
+#             Kr, Kg, Kb = K / R, K / G, K / B
+#             return np.concatenate(
+#                 (Kr * r.reshape(256, 256, 1), Kg * g.reshape(256, 256, 1), Kb * b.reshape(256, 256, 1)), axis=2)
+#         else:
+#             raise RuntimeError
+#     elif region == "kernel":
+#         h_k, w_k = kernel_size[0], kernel_size[1]  # 核的长宽
+#         h, w = img[0].shape  # 图像长（纵向）宽（横向）
+#         h_l, h_r = int(h / 2) - h_k, int(h / 2) + h_k
+#         w_l, w_r = int(w / 2) - w_k, int(w / 2) + w_k
+#         r, g, b = img[0], img[1], img[2]
+#         r_kernel, g_kernel, b_kernel = img[0, h_l:h_r, w_l: w_r], img[1, h_l:h_r, w_l: w_r], img[2, h_l:h_r, w_l: w_r]
+#         R, G, B = np.mean(r_kernel), np.mean(g_kernel), np.mean(b_kernel)
+#         K = (R + G + B) / 3
+#         Kr, Kg, Kb = K / R, K / G, K / B
+#         if shape == "CHW" or shape == "chw":
+#             return np.array((Kr * r, Kg * g, Kb * b))
+#         elif shape == "HWC" or shape == "hwc":
+#             return np.concatenate(
+#                 (Kr * r.reshape(256, 256, 1), Kg * g.reshape(256, 256, 1), Kb * b.reshape(256, 256, 1)), axis=2)
+#         else:
+#             raise RuntimeError
+#     else:
+#         raise RuntimeError
 
-
-def median_balance(img: np.ndarray, shape: str, region: str, kernel_size: list = [60, 60]):
-    """
-    三通道直方图平衡
-    :param img: 输入图像，CHW和HWC均可，需要在shape中输入
-    :param kernel_size: 核大小，长宽不必相同
-    :param shape: 应当为CHW或HWC
-    :param region: 全局模式则输入global，否则输入kernel使用中心核模式，无默认大小
-    :return: 根据输入shape返回对应形式的ndarray
-    """
-    if region == "global":
-        if shape == "CHW" or shape == "chw":
-            r, g, b = img[0], img[1], img[2]
-            R, G, B = np.median(r), np.median(g), np.median(b)
-            K = (R + G + B) / 3
-            Kr, Kg, Kb = K / R, K / G, K / B
-            return np.array((Kr * r, Kg * g, Kb * b))
-        elif shape == "HWC" or shape == "hwc":
-            r, g, b = img[:, :, 0], img[:, :, 1], img[:, :, 2]
-            R, G, B = np.median(r), np.median(g), np.median(b)
-            K = (R + G + B) / 3
-            Kr, Kg, Kb = K / R, K / G, K / B
-            return np.concatenate(
-                (Kr * r.reshape(256, 256, 1), Kg * g.reshape(256, 256, 1), Kb * b.reshape(256, 256, 1)), axis=2)
-        else:
-            raise RuntimeError
-    elif region == "kernel":
-        h_k, w_k = kernel_size[0], kernel_size[1]  # 核的长宽
-        h, w = img[0].shape  # 图像长（纵向）宽（横向）
-        h_l, h_r = int(h / 2) - h_k, int(h / 2) + h_k
-        w_l, w_r = int(w / 2) - w_k, int(w / 2) + w_k
-        r, g, b = img[0], img[1], img[2]
-        r_kernel, g_kernel, b_kernel = img[0, h_l:h_r, w_l: w_r], img[1, h_l:h_r, w_l: w_r], img[2, h_l:h_r, w_l: w_r]
-        R, G, B = np.median(r_kernel), np.median(g_kernel), np.median(b_kernel)
-        K = (R + G + B) / 3
-        Kr, Kg, Kb = K / R, K / G, K / B
-        if shape == "CHW" or shape == "chw":
-            return np.array((Kr * r, Kg * g, Kb * b))
-        elif shape == "HWC" or shape == "hwc":
-            return np.concatenate(
-                (Kr * r.reshape(256, 256, 1), Kg * g.reshape(256, 256, 1), Kb * b.reshape(256, 256, 1)), axis=2)
-        else:
-            raise RuntimeError
-    else:
-        raise RuntimeError
+#
+# def median_balance(img: np.ndarray, shape: str, region: str, kernel_size: list = [60, 60]):
+#     """
+#     三通道直方图平衡
+#     :param img: 输入图像，CHW和HWC均可，需要在shape中输入
+#     :param kernel_size: 核大小，长宽不必相同
+#     :param shape: 应当为CHW或HWC
+#     :param region: 全局模式则输入global，否则输入kernel使用中心核模式，无默认大小
+#     :return: 根据输入shape返回对应形式的ndarray
+#     """
+#     if region == "global":
+#         if shape == "CHW" or shape == "chw":
+#             r, g, b = img[0], img[1], img[2]
+#             R, G, B = np.median(r), np.median(g), np.median(b)
+#             K = (R + G + B) / 3
+#             Kr, Kg, Kb = K / R, K / G, K / B
+#             return np.array((Kr * r, Kg * g, Kb * b))
+#         elif shape == "HWC" or shape == "hwc":
+#             r, g, b = img[:, :, 0], img[:, :, 1], img[:, :, 2]
+#             R, G, B = np.median(r), np.median(g), np.median(b)
+#             K = (R + G + B) / 3
+#             Kr, Kg, Kb = K / R, K / G, K / B
+#             return np.concatenate(
+#                 (Kr * r.reshape(256, 256, 1), Kg * g.reshape(256, 256, 1), Kb * b.reshape(256, 256, 1)), axis=2)
+#         else:
+#             raise RuntimeError
+#     elif region == "kernel":
+#         h_k, w_k = kernel_size[0], kernel_size[1]  # 核的长宽
+#         h, w = img[0].shape  # 图像长（纵向）宽（横向）
+#         h_l, h_r = int(h / 2) - h_k, int(h / 2) + h_k
+#         w_l, w_r = int(w / 2) - w_k, int(w / 2) + w_k
+#         r, g, b = img[0], img[1], img[2]
+#         r_kernel, g_kernel, b_kernel = img[0, h_l:h_r, w_l: w_r], img[1, h_l:h_r, w_l: w_r], img[2, h_l:h_r, w_l: w_r]
+#         R, G, B = np.median(r_kernel), np.median(g_kernel), np.median(b_kernel)
+#         K = (R + G + B) / 3
+#         Kr, Kg, Kb = K / R, K / G, K / B
+#         if shape == "CHW" or shape == "chw":
+#             return np.array((Kr * r, Kg * g, Kb * b))
+#         elif shape == "HWC" or shape == "hwc":
+#             return np.concatenate(
+#                 (Kr * r.reshape(256, 256, 1), Kg * g.reshape(256, 256, 1), Kb * b.reshape(256, 256, 1)), axis=2)
+#         else:
+#             raise RuntimeError
+#     else:
+#         raise RuntimeError
 
 
 def mtf(data: np.ndarray, m: float):
@@ -210,14 +213,14 @@ def mtf(data: np.ndarray, m: float):
     return ((m - 1) * data) / ((2 * m - 1) * data - m)
 
 
-def rgb2gray(img: np.ndarray, shape: str):
-    """
-    rgb转灰度图
-    :param img: 图像
-    :param channel_factor: 三通道权重因子，应为list
-    :return:
-    """
-    return np.dot(img[..., :3], [0.299, 0.587, 0.114])
+# def rgb2gray(img: np.ndarray, shape: str):
+#     """
+#     rgb转灰度图
+#     :param img: 图像
+#     :param channel_factor: 三通道权重因子，应为list
+#     :return:
+#     """
+#     return np.dot(img[..., :3], [0.299, 0.587, 0.114])
 
 
 def channel_cut(gray):
@@ -350,12 +353,6 @@ def save_dat(object, dir):
             print("error")
         else:
             pickle.dump(object, f)
-    # print(type(object))
-    # print(object.shape)
-    # hdu = fits.PrimaryHDU(object)
-    # hdul = fits.HDUList([hdu])
-    # hdul.writeto(dir.split(".dat")[0] + ".fits")
-
 
 def cf_metrics(loader, model, save_path, save: bool = False):
     y_pred = []  # save predction
@@ -369,13 +366,7 @@ def cf_metrics(loader, model, save_path, save: bool = False):
         y_pred.extend(output)  # save prediction
         labels = labels.data.cpu().numpy()
         y_true.extend(labels)  # save ground truth
-    # classes = (
-    #     "merger", "smoothRounded", "smoothInBetween", "smoothCigarShaped",
-    #     "edgeOn", "diskNoWeakBar", "diskStrongBar")
-    classes = (
-        "merger", "smoothRounded", "smoothInBetween", "smoothCigarShaped",
-        "edgeOnBulge", "edgeOnNoBulge", "diskNoBar", "diskWeakBar", "diskStrongBar")
-
+    classes = data_config.classes
     cf_matrix = confusion_matrix(y_true, y_pred)
     df_cm = pd.DataFrame(cf_matrix.astype('float') / cf_matrix.sum(axis=1)[:, np.newaxis],
                          index=[i for i in classes],
@@ -383,6 +374,6 @@ def cf_metrics(loader, model, save_path, save: bool = False):
     plt.figure(figsize=(10, 10))
     if save:
         sns.heatmap(df_cm, annot=True).get_figure()
-        plt.savefig(save_path)
+        plt.savefig(data_config.metrix_save_path)
     else:
         return sns.heatmap(df_cm, annot=True).get_figure()
