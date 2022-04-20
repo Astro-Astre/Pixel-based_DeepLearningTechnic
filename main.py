@@ -32,9 +32,9 @@ if __name__ == "__main__":
     # TRAININGSET_TXT = SAVE_PATH + "training_multimask_7.txt"
     # TESTSET_TXT = SAVE_PATH + "test_multimask_7.txt"
     # VALIDATIONSET_TXT = SAVE_PATH + "validation_multimask_7.txt"
-    TRAININGSET_TXT = SAVE_PATH + "train-CLASS_7-STF.txt"
-    TESTSET_TXT = SAVE_PATH + "valid-CLASS_7-STF.txt"
-    VALIDATIONSET_TXT = SAVE_PATH + "test-CLASS_7-STF.txt"
+    TRAININGSET_TXT = SAVE_PATH + "train-CLASS_9-STF.txt"
+    TESTSET_TXT = SAVE_PATH + "valid-CLASS_9-STF.txt"
+    VALIDATIONSET_TXT = SAVE_PATH + "test-CLASS_9-STF.txt"
 
     train_data = DecalsDataset(annotations_file=TRAININGSET_TXT, transform=transfer)
     train_loader = DataLoader(dataset=train_data, batch_size=BATCH_SIZE,
@@ -47,6 +47,6 @@ if __name__ == "__main__":
                                    shuffle=False, num_workers=20, pin_memory=True)
     mkdir(SAVE_PATH + "model/")
     # modelPkg_name = SAVE_PATH + "model_auto/" + "densenet264_focal_2_5class/"
-    modelPkg_name = SAVE_PATH + "trained_model/" + "densenet_stf_modifiedFocalLoss/"
+    modelPkg_name = SAVE_PATH + "trained_model/" + "densenet_stf_modifiedFocalLoss_CLASS_9/"
     trainModel(modelPkg_name, flag=False, last_epoch=17, train_loader=train_loader, test_loader=test_loader,
                validation_loader=validation_loader)

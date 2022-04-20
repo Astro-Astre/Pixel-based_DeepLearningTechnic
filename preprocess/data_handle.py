@@ -369,8 +369,13 @@ def cf_metrics(loader, model, save_path, save: bool = False):
         y_pred.extend(output)  # save prediction
         labels = labels.data.cpu().numpy()
         y_true.extend(labels)  # save ground truth
+    # classes = (
+    #     "merger", "smoothRounded", "smoothInBetween", "smoothCigarShaped",
+    #     "edgeOn", "diskNoWeakBar", "diskStrongBar")
     classes = (
-        "merger", "smoothRounded", "smoothInBetween", "smoothCigarShaped", "edgeOn", "diskNoWeakBar", "diskStrongBar")
+        "merger", "smoothRounded", "smoothInBetween", "smoothCigarShaped",
+        "edgeOnBulge", "edgeOnNoBulge", "diskNoBar", "diskWeakBar", "diskStrongBar")
+
     cf_matrix = confusion_matrix(y_true, y_pred)
     df_cm = pd.DataFrame(cf_matrix.astype('float') / cf_matrix.sum(axis=1)[:, np.newaxis],
                          index=[i for i in classes],

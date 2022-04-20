@@ -16,7 +16,7 @@ from models.swin_transformer import *
 torch.manual_seed(1926)  # 设置随机数种子，确保结果可重复
 BATCH_SIZE = 64  # 批处理大小
 LEARNING_RATE = 0.0001  # 学习率
-CLASSES = 7
+CLASSES = 9
 EPOCHES = 150  # 训练次数
 MOMENTUM = 0.9
 SAVE_PATH = "/data/renhaoye/decals_2022/"  # the head of the directory to save
@@ -40,10 +40,12 @@ def trainModel(model_pkg, flag, last_epoch, train_loader, test_loader, validatio
     mkdir(model_pkg)
     # weight = [54528 / 23136, 54528 / 30435, 54528 / 17196, 54528 / 21237, 54528 / 22099, 54528 / 54528, 54528 / 12928]
     # weight = [34101 / 23424, 34101 / 24737, 34101 / 26559, 34101 / 21502, 34101 / 12879, 34101 / 34101, 34101 / 13088]
-    weight = [1 - (23424 / 156290), 1 - (24737 / 156290), 1 - (26559 / 156290), 1 - (21502 / 156290),
-              1 - (12879 / 156290), 1 - (34101 / 156290), 1 - (13088 / 156290)]
+    # weight = [1 - (23424 / 156290), 1 - (24737 / 156290), 1 - (26559 / 156290), 1 - (21502 / 156290),
+    #           1 - (12879 / 156290), 1 - (34101 / 156290), 1 - (13088 / 156290)]
+    weight = [1 - (23424 / 174352), 1 - (24737 / 174352), 1 - (26559 / 174352), 1 - (21502 / 174352),
+              1 - (12813 / 174352), 1 - (9560 / 174352), 1 - (31245 / 174352), 1 - (11424 / 174352), 1 - (13088 / 174352)]
     # criterion = nn.CrossEntropyLoss()  # loss function
-    criterion = focal_loss(alpha=weight, gamma=2, num_classes=7)
+    criterion = focal_loss(alpha=weight, gamma=2, num_classes=9)
     # optimizer = optim.SGD(model.parameters(), lr=LEARNING_RATE, momentum=MOMENTUM)
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
     losses = []  # a list of train_loss

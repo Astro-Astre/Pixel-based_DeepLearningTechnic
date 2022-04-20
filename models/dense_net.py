@@ -224,41 +224,42 @@ def _densenet(
     model = DenseNet(num_init_channels, growth_rate, block_config, num_init_features, num_classes=classes, **kwargs)
     return model
 
+NUM_CLASS = 9
 
 def denseNet121Decals(progress: bool = True, **kwargs: Any) -> DenseNet:
     return _densenet(num_init_channels=3, growth_rate=16, block_config=(6, 12, 24, 16),
-                     classes=7, num_init_features=64, **kwargs)
+                     classes=NUM_CLASS, num_init_features=64, **kwargs)
 
 
 def denseNet169Decals(progress: bool = True, **kwargs: Any) -> DenseNet:
     return _densenet(num_init_channels=3, growth_rate=16, block_config=(6, 12, 32, 32),
-                     classes=7, num_init_features=64, **kwargs)
+                     classes=NUM_CLASS, num_init_features=64, **kwargs)
 
 
 def denseNet201Decals(progress: bool = True, **kwargs: Any) -> DenseNet:
     return _densenet(num_init_channels=3, growth_rate=16, block_config=(6, 12, 48, 32),
-                     classes=7, num_init_features=64, **kwargs)
+                     classes=NUM_CLASS, num_init_features=64, **kwargs)
 
 
 def denseNet264Decals(progress: bool = True, **kwargs: Any) -> DenseNet:
     return _densenet(num_init_channels=3, growth_rate=16, block_config=(6, 12, 64, 48),
-                     classes=7, num_init_features=32, **kwargs)
+                     classes=NUM_CLASS, num_init_features=32, **kwargs)
 
 def denseNet121Decals_masked(progress: bool = True, **kwargs: Any) -> DenseNet:
     return _densenet(num_init_channels=4, growth_rate=16, block_config=(6, 12, 24, 16),
-                     classes=7, num_init_features=64, **kwargs)
+                     classes=NUM_CLASS, num_init_features=64, **kwargs)
 
 
 def denseNet169Decals_masked(progress: bool = True, **kwargs: Any) -> DenseNet:
     return _densenet(num_init_channels=4, growth_rate=16, block_config=(6, 12, 32, 32),
-                     classes=7, num_init_features=64, **kwargs)
+                     classes=NUM_CLASS, num_init_features=64, **kwargs)
 
 
 def denseNet201Decals_masked(progress: bool = True, **kwargs: Any) -> DenseNet:
     return _densenet(num_init_channels=4, growth_rate=16, block_config=(6, 12, 48, 32),
-                     classes=7, num_init_features=64, **kwargs)
+                     classes=NUM_CLASS, num_init_features=64, **kwargs)
 
 
 def denseNet264Decals_masked(progress: bool = True, **kwargs: Any) -> DenseNet:
     return _densenet(num_init_channels=4, growth_rate=16, block_config=(6, 12, 64, 48),
-                     classes=7, num_init_features=32, **kwargs)
+                     classes=NUM_CLASS, num_init_features=32, **kwargs)
