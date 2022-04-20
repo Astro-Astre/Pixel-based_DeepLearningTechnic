@@ -1,6 +1,6 @@
-from preprocess.data_handle import *
 import os
 import torchvision.transforms as transforms
+from preprocess.data_handle import *
 
 
 class data_config:
@@ -19,7 +19,7 @@ class data_config:
     '''***********- Hyper Arguments -*************'''
     WORKERS = 20
     epochs = 30
-    batch_size = 128
+    batch_size = 64
     gamma = 2
     rand_seed = 1926
     lr = 0.0001
@@ -41,10 +41,8 @@ class data_config:
     loss_func_parm = {'alpha': weight, 'gamma': gamma, 'num_classes': num_class}
     device = "cuda:0"
     multi_gpu = False
-    model_path = root_path + 'trained_model/%s-LR_%s-LOSS_%s-CLASS_%s-BATCHSIZE_%s' \
+    model_path = root_path + 'trained_model/%s-LR_%s-LOSS_%s-CLASS_%s-BATCHSIZE_%s/' \
                  % (model_name, str(lr), loss_func, str(num_class), str(batch_size))
-    if not os.path.exists(model_path):
-        os.makedirs(model_path)
     metrix_save_path = ""
     # classes = (
     #     "merger", "smoothRounded", "smoothInBetween", "smoothCigarShaped",

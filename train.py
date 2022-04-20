@@ -34,6 +34,7 @@ class trainer:
         losses = []
         acces = []
         start = -1
+        mkdir(self.config.model_path)
         mkdir(self.config.model_path + "log/")
         writer = torch.utils.tensorboard.SummaryWriter(self.config.model_path + "log/")
         for epoch in range(start + 1, self.config.epochs):
@@ -47,9 +48,9 @@ class trainer:
                 #     with record_function("model_cnn"):
                 out = self.model(X)  # 正向传播
                 loss_value = self.loss_func(out, label)  # 求损失值
-                self.loss_func.zero_grad()  # 优化器梯度归零
+                self.optimizer.zero_grad()  # 优化器梯度归零
                 loss_value.backward()  # 反向转播，刷新梯度值
-                self.loss_func.step()
+                self.optimizer.step()
                 train_loss += float(loss_value)  # 计算损失
                 _, pred = out.max(1)  # get the predict label
                 num_correct = (pred == label).sum()  # compute the sum of correct pred
