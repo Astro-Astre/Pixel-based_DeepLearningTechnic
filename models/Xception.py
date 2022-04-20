@@ -7,7 +7,7 @@
     https://arxiv.org/abs/1610.02357
 """
 
-import torch
+from args import *
 import torch.nn as nn
 
 
@@ -229,7 +229,7 @@ class Xception(nn.Module):
 
 
 def x_ception(num_init_channels, num_class):
-    return Xception(block= MiddleFLowBlock, num_init_channels=num_init_channels, num_class=num_class)
+    return Xception(block=MiddleFLowBlock, num_init_channels=data_config.input_channel, num_class=data_config.num_class)
 
 # if __name__ == '__main__':
 #     models = xception(7)
