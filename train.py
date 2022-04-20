@@ -1,5 +1,6 @@
 # -*- coding: utf-8-*-
 
+from args import *
 from torch import optim
 from torch import nn
 import torch
@@ -15,15 +16,7 @@ from models.SwinTransformer import *
 from torch.utils.data import DataLoader
 from decals_dataset import *
 from preprocess.data_handle import *
-from args import *
 
-#
-# BATCH_SIZE = 64  # 批处理大小
-# LEARNING_RATE = 0.0001  # 学习率
-# CLASSES = 9
-# EPOCHES = 150  # 训练次数
-# MOMENTUM = 0.9
-# SAVE_PATH = "/data/renhaoye/decals_2022/"  # the head of the directory to save
 
 if data_config.rand_seed > 0:
     init_rand_seed(data_config.rand_seed)
@@ -65,9 +58,7 @@ class trainer:
                 # print(prof.key_averages().table(sort_by="gpu_time_total", row_limit=10))
             writer.add_scalar('Training loss by steps', train_loss / len(train_loader), epoch)
             writer.add_scalar('Training accuracy by steps', train_acc / len(train_loader), epoch)
-            writer.add_figure("Confusion matrix", cf_metrics(train_loader,
-                                                             self.model, "/data/renhaoye/decals_2022/1.png",
-                                                             False), epoch)
+            writer.add_figure("Confusion matrix", cf_metrics(train_loader, self.model, False), epoch)
             losses.append(train_loss / len(train_loader))
             acces.append(100 * train_acc / len(train_loader))
             print("epoch: ", epoch)
@@ -91,7 +82,7 @@ class trainer:
                     acc = int(num_correct) / X.shape[0]
                     eval_acc += acc
             writer.add_figure("Confusion matrix valid",
-                              cf_metrics(valid_loader, self.model, "/data/renhaoye/decals_2022/1.png", False),
+                              cf_metrics(valid_loader, self.model, False),
                               epoch)
             eval_losses.append(eval_loss / len(test_loader))
             eval_acces.append(eval_acc / len(test_loader))
@@ -119,10 +110,10 @@ valid_data = DecalsDataset(annotations_file=data_config.test_file, transform=dat
 valid_loader = DataLoader(dataset=valid_data, batch_size=data_config.batch_size,
                           shuffle=False, num_workers=data_config.WORKERS, pin_memory=True)
 
-model = eval(data_config.model_name)(data_config.model_parm)
+model = eval(data_config.model_name)(**data_config.model_parm)
 model.to(data_config.device)
 
-loss_func = eval(data_config.loss_func)(data_config.loss_func_parm)
+loss_func = eval(data_config.loss_func)(**data_config.loss_func_parm)
 optimizer = eval(data_config.optimizer)(model.parameters(), **data_config.optimizer_parm)
 
 Trainer = trainer(loss_func=loss_func, model=model, optimizer=optimizer, config=data_config)

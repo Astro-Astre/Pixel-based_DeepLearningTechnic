@@ -1,4 +1,3 @@
-from args import *
 import datetime
 import os
 import pickle
@@ -11,6 +10,7 @@ import matplotlib.pyplot as plt
 from astropy.io import fits
 import torchvision.transforms as transforms
 import random
+from args import *
 
 
 def get_weight(num_samples: list):
@@ -354,7 +354,8 @@ def save_dat(object, dir):
         else:
             pickle.dump(object, f)
 
-def cf_metrics(loader, model, save_path, save: bool = False):
+
+def cf_metrics(loader, model, save: bool = False):
     y_pred = []  # save predction
     y_true = []  # save ground truth
     device = "cuda:0"

@@ -1,5 +1,6 @@
 import torch.nn as nn
 import torch.nn.functional as F
+import torch
 from args import *
 
 
@@ -17,7 +18,7 @@ class focal_loss(nn.Module):
         super(focal_loss, self).__init__()
         self.size_average = size_average
         assert len(alpha) == num_classes  # α可以以list方式输入,size:[num_classes] 用于对不同类别精细地赋予权重
-        self.alpha = torch.Tensor(alpha)
+        self.alpha = torch.Tensor(list(alpha))
         self.gamma = gamma
 
     def forward(self, preds, labels):
