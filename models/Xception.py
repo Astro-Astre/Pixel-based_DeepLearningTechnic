@@ -12,7 +12,7 @@ import torch.nn as nn
 
 
 class SeperableConv2d(nn.Module):
-
+ 
     # ***Figure 4. An “extreme” version of our Inception module,
     # with one spatial convolution per output channel of the 1x1
     # convolution."""
@@ -228,7 +228,7 @@ class Xception(nn.Module):
         return x
 
 
-def x_ception(num_init_channels, num_class):
+def x_ception():
     return Xception(block=MiddleFLowBlock, num_init_channels=data_config.input_channel, num_class=data_config.num_class)
 
 # if __name__ == '__main__':

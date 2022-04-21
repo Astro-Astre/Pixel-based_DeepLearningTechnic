@@ -4,12 +4,12 @@ from preprocess.data_handle import *
 
 
 class data_config:
-    model_name = "denseNet264"
-    model_parm = {}
-
-    '''***********- dataset and directory -*************'''
     input_channel = 3
     num_class = 9
+    model_name = "efficientnet_b5"
+    model_parm = {'input_channels': input_channel, 'num_class': num_class}
+
+    '''***********- dataset and directory -*************'''
     root_path = '/data/renhaoye/decals_2022/'
     train_file = '/data/renhaoye/decals_2022/train-CLASS_9-STF.txt'
     valid_file = '/data/renhaoye/decals_2022/valid-CLASS_9-STF.txt'
@@ -19,7 +19,7 @@ class data_config:
     '''***********- Hyper Arguments -*************'''
     WORKERS = 20
     epochs = 30
-    batch_size = 64
+    batch_size = 32
     gamma = 2
     rand_seed = 1926
     lr = 0.0001
@@ -40,6 +40,7 @@ class data_config:
     # loss_func = 'nn.CrossEntropyLoss'
     loss_func_parm = {'alpha': weight, 'gamma': gamma, 'num_classes': num_class}
     device = "cuda:0"
+    # local_rank = 0, 1
     multi_gpu = False
     model_path = root_path + 'trained_model/%s-LR_%s-LOSS_%s-CLASS_%s-BATCHSIZE_%s/' \
                  % (model_name, str(lr), loss_func, str(num_class), str(batch_size))

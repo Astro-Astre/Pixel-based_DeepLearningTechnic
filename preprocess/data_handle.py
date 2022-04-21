@@ -10,7 +10,6 @@ import matplotlib.pyplot as plt
 from astropy.io import fits
 import torchvision.transforms as transforms
 import random
-from args import *
 
 
 def get_weight(num_samples: list):
@@ -354,27 +353,3 @@ def save_dat(object, dir):
         else:
             pickle.dump(object, f)
 
-
-def cf_metrics(loader, model, save: bool = False):
-    y_pred = []  # save predction
-    y_true = []  # save ground truth
-    device = "cuda:0"
-    # iterate over data
-    for inputs, labels in loader:
-        inputs, labels = inputs.to(device), labels.to(device)
-        output = model(inputs)  # Feed Network
-        output = (torch.max(torch.exp(output), 1)[1]).data.cpu().numpy()
-        y_pred.extend(output)  # save prediction
-        labels = labels.data.cpu().numpy()
-        y_true.extend(labels)  # save ground truth
-    classes = data_config.classes
-    cf_matrix = confusion_matrix(y_true, y_pred)
-    df_cm = pd.DataFrame(cf_matrix.astype('float') / cf_matrix.sum(axis=1)[:, np.newaxis],
-                         index=[i for i in classes],
-                         columns=[i for i in classes])
-    plt.figure(figsize=(10, 10))
-    if save:
-        sns.heatmap(df_cm, annot=True).get_figure()
-        plt.savefig(data_config.metrix_save_path)
-    else:
-        return sns.heatmap(df_cm, annot=True).get_figure()

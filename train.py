@@ -4,6 +4,7 @@ from args import *
 from torch import optim
 from torch import nn
 import torch
+from metrix import *
 from torch.utils.tensorboard import SummaryWriter
 from torch.nn import functional as F
 from torch.optim.lr_scheduler import ReduceLROnPlateau
@@ -11,12 +12,13 @@ from models.focal_loss import *
 from preprocess.data_handle import *
 from models.SimpleCnn import *
 from models.Xception import *
+from models.efficientnet import *
 from models.DenseNet import *
 from models.SwinTransformer import *
 from torch.utils.data import DataLoader
 from decals_dataset import *
 from preprocess.data_handle import *
-
+# import torch.distributed as dist
 
 if data_config.rand_seed > 0:
     init_rand_seed(data_config.rand_seed)
@@ -37,13 +39,23 @@ class trainer:
         mkdir(self.config.model_path)
         mkdir(self.config.model_path + "log/")
         writer = torch.utils.tensorboard.SummaryWriter(self.config.model_path + "log/")
+        info = data_config()
+        with open(data_config.model_path + "info.txt", "w") as w:
+            for each in info.__dir__():
+                attr_name = each
+                attr_value = info.__getattribute__(each)
+                w.write(str(attr_name) + ':' + str(attr_value) + "\n")
         for epoch in range(start + 1, self.config.epochs):
             train_loss = 0
             train_acc = 0
             self.model.train()
             for i, (X, label) in enumerate(train_loader):  # 遍历train_loader
                 label = torch.as_tensor(label, dtype=torch.long)
-                X, label = X.to(self.config.device), label.to(self.config.device)
+                '''******** - 非分布式 -********'''
+                # X, label = X.to(self.config.device), label.to(self.config.device)
+                '''******** - 分布式 -********'''
+                X = X.cuda()
+                label = label.cuda()
                 # with profile(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], record_shapes=True) as prof:
                 #     with record_function("model_cnn"):
                 out = self.model(X)  # 正向传播
@@ -74,7 +86,9 @@ class trainer:
                 self.model.eval()
                 for X, label in test_loader:
                     label = torch.as_tensor(label, dtype=torch.long)
-                    X, label = X.to(self.config.device), label.to(self.config.device)
+                    # X, label = X.to(self.config.device), label.to(self.config.device)
+                    X = X.cuda()
+                    label = label.cuda()
                     test_out = self.model(X)
                     test_loss = self.loss_func(test_out, label)
                     eval_loss += float(test_loss)
@@ -101,18 +115,35 @@ class trainer:
             torch.save(self.model, '%s/model_%d.model' % (self.config.model_path, epoch))
 
 
+# dist.init_process_group(backend='nccl')
+# dist.init_process_group(backend, init_method='tcp://10.1.1.20:23456',
+#                         rank=args.rank, world_size=4)
+# torch.cuda.set_device(data_config.local_rank)
+
 train_data = DecalsDataset(annotations_file=data_config.train_file, transform=data_config.transfer)
+# train_sampler = torch.utils.data.distributed.DistributedSampler(train_data)
 train_loader = DataLoader(dataset=train_data, batch_size=data_config.batch_size,
                           shuffle=True, num_workers=data_config.WORKERS, pin_memory=True)
+
 test_data = DecalsDataset(annotations_file=data_config.valid_file, transform=data_config.transfer)
+# test_sampler = torch.utils.data.distributed.DistributedSampler(test_data)
 test_loader = DataLoader(dataset=test_data, batch_size=data_config.batch_size,
                          shuffle=True, num_workers=data_config.WORKERS, pin_memory=True)
+
 valid_data = DecalsDataset(annotations_file=data_config.test_file, transform=data_config.transfer)
+# valid_sampler = torch.utils.data.distributed.DistributedSampler(valid_data)
 valid_loader = DataLoader(dataset=valid_data, batch_size=data_config.batch_size,
                           shuffle=False, num_workers=data_config.WORKERS, pin_memory=True)
 
 model = eval(data_config.model_name)(**data_config.model_parm)
-model.to(data_config.device)
+model = model.cuda()
+device_ids = [0, 1]
+model = torch.nn.DataParallel(model, device_ids=device_ids)
+# model.to(data_config.device)
+# local_rank = torch.distributed.get_rank()
+# torch.cuda.set_device(local_rank)
+# device = torch.device("cuda", local_rank)
+# model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[local_rank])
 
 loss_func = eval(data_config.loss_func)(**data_config.loss_func_parm)
 optimizer = eval(data_config.optimizer)(model.parameters(), **data_config.optimizer_parm)
