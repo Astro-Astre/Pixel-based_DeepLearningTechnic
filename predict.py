@@ -4,13 +4,14 @@ from decals_dataset import *
 from models.Xception import x_ception
 import pandas as pd
 import time
+import csv
 
 
 def predict(model_name, dir):
     transfer = transforms.Compose([
         transforms.ToTensor(),
     ])
-    model = x_ception(7)
+    model = x_ception()
     model = nn.DataParallel(model)
     device = "cuda:0"
     model.load_state_dict(torch.load(model_name, map_location=lambda storage, loc: storage).state_dict())

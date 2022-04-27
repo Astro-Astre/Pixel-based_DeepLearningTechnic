@@ -75,7 +75,7 @@ class Bottleneck(nn.Module):
         out = self.bn3(out)
         if self.downsample is not None:
             residual = self.downsample(x)
-        # attention block
+        # attention blocks
 
         out += residual
         out = self.relu(out)

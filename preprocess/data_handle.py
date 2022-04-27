@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from astropy.io import fits
 import torchvision.transforms as transforms
 import random
+from torch.backends import cudnn
 
 
 def get_weight(num_samples: list):
@@ -32,9 +33,12 @@ def changeAxis(data: np.ndarray):
 
 def init_rand_seed(rand_seed):
     torch.manual_seed(rand_seed)
-    torch.cuda.manual_seed_all(rand_seed)
+    torch.cuda.manual_seed(rand_seed)  # 为当前GPU设置随机种子
+    torch.cuda.manual_seed_all(rand_seed)  # 为所有GPU设置随机种子
     np.random.seed(rand_seed)
     random.seed(rand_seed)
+    cudnn.benchmark = False
+    cudnn.deterministic = True
     # torch.backends.cudnn.deterministic = True # 这个可能会导致训练过程非常慢
 
 
@@ -353,3 +357,17 @@ def save_dat(object, dir):
         else:
             pickle.dump(object, f)
 
+
+# 读取模型
+def load_checkpoint(filepath):
+    checkpoint = torch.load(filepath)
+    model = checkpoint['model']  # 提取网络结构
+    model = torch.nn.DataParallel(model)
+    model.load_state_dict(checkpoint['model_state_dict'])  # 加载网络权重参数
+    for parameter in model.parameters():
+        parameter.requires_grad = False
+    model.eval()
+    #     print(model)
+    #     for name in model.state_dict():
+    #         print(name)
+    return model

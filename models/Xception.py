@@ -12,7 +12,7 @@ import torch.nn as nn
 
 
 class SeperableConv2d(nn.Module):
- 
+
     # ***Figure 4. An “extreme” version of our Inception module,
     # with one spatial convolution per output channel of the 1x1
     # convolution."""
@@ -26,13 +26,11 @@ class SeperableConv2d(nn.Module):
             bias=False,
             **kwargs
         )
-
         self.pointwise = nn.Conv2d(input_channels, output_channels, 1, bias=False)
 
     def forward(self, x):
         x = self.depthwise(x)
         x = self.pointwise(x)
-
         return x
 
 
@@ -47,13 +45,11 @@ class EntryFlow(nn.Module):
             nn.BatchNorm2d(32),
             nn.ReLU(inplace=True)
         )
-
         self.conv2 = nn.Sequential(
             nn.Conv2d(32, 64, 3, padding=1, bias=False),
             nn.BatchNorm2d(64),
             nn.ReLU(inplace=True)
         )
-
         self.conv3_residual = nn.Sequential(
             SeperableConv2d(64, 128, 3, padding=1),
             nn.BatchNorm2d(128),
@@ -62,12 +58,10 @@ class EntryFlow(nn.Module):
             nn.BatchNorm2d(128),
             nn.MaxPool2d(3, stride=2, padding=1),
         )
-
         self.conv3_shortcut = nn.Sequential(
             nn.Conv2d(64, 128, 1, stride=2),
             nn.BatchNorm2d(128),
         )
-
         self.conv4_residual = nn.Sequential(
             nn.ReLU(inplace=True),
             SeperableConv2d(128, 256, 3, padding=1),
@@ -77,12 +71,10 @@ class EntryFlow(nn.Module):
             nn.BatchNorm2d(256),
             nn.MaxPool2d(3, stride=2, padding=1)
         )
-
         self.conv4_shortcut = nn.Sequential(
             nn.Conv2d(128, 256, 1, stride=2),
             nn.BatchNorm2d(256),
         )
-
         # no downsampling
         self.conv5_residual = nn.Sequential(
             nn.ReLU(inplace=True),
@@ -93,7 +85,6 @@ class EntryFlow(nn.Module):
             nn.BatchNorm2d(728),
             nn.MaxPool2d(3, 1, padding=1)
         )
-
         # no downsampling
         self.conv5_shortcut = nn.Sequential(
             nn.Conv2d(256, 728, 1),
@@ -112,7 +103,6 @@ class EntryFlow(nn.Module):
         residual = self.conv5_residual(x)
         shortcut = self.conv5_shortcut(x)
         x = residual + shortcut
-
         return x
 
 
@@ -142,29 +132,25 @@ class MiddleFLowBlock(nn.Module):
         residual = self.conv1(x)
         residual = self.conv2(residual)
         residual = self.conv3(residual)
-
         shortcut = self.shortcut(x)
-
         return shortcut + residual
 
 
 class MiddleFlow(nn.Module):
     def __init__(self, block):
         super().__init__()
-
         # """then through the middle flow which is repeated eight times"""
         self.middel_block = self._make_flow(block, 8)
-
-    def forward(self, x):
-        x = self.middel_block(x)
-        return x
 
     def _make_flow(self, block, times):
         flows = []
         for i in range(times):
             flows.append(block())
-
         return nn.Sequential(*flows)
+
+    def forward(self, x):
+        x = self.middel_block(x)
+        return x
 
 
 class ExitFLow(nn.Module):
@@ -180,12 +166,10 @@ class ExitFLow(nn.Module):
             nn.BatchNorm2d(1024),
             nn.MaxPool2d(3, stride=2, padding=1)
         )
-
         self.shortcut = nn.Sequential(
             nn.Conv2d(728, 1024, 1, stride=2),
             nn.BatchNorm2d(1024)
         )
-
         self.conv = nn.Sequential(
             SeperableConv2d(1024, 1536, 3, padding=1),
             nn.BatchNorm2d(1536),
@@ -194,7 +178,6 @@ class ExitFLow(nn.Module):
             nn.BatchNorm2d(2048),
             nn.ReLU(inplace=True)
         )
-
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
 
     def forward(self, x):
@@ -203,7 +186,6 @@ class ExitFLow(nn.Module):
         output = shortcut + residual
         output = self.conv(output)
         output = self.avgpool(output)
-
         return output
 
 
@@ -215,7 +197,6 @@ class Xception(nn.Module):
         self.entry_flow = EntryFlow(num_init_channels)
         self.middel_flow = MiddleFlow(block)
         self.exit_flow = ExitFLow()
-
         self.fc = nn.Linear(2048, num_class)
 
     def forward(self, x):
@@ -224,15 +205,9 @@ class Xception(nn.Module):
         x = self.exit_flow(x)
         x = x.view(x.size(0), -1)
         x = self.fc(x)
-
         return x
 
 
 def x_ception():
     return Xception(block=MiddleFLowBlock, num_init_channels=data_config.input_channel, num_class=data_config.num_class)
 
-# if __name__ == '__main__':
-#     models = xception(7)
-#     x = torch.randn((1, 3, 256, 256))
-#     output = models(x)
-#     print(output)

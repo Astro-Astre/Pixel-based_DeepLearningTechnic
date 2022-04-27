@@ -18,7 +18,8 @@ from models.SwinTransformer import *
 from torch.utils.data import DataLoader
 from decals_dataset import *
 from preprocess.data_handle import *
-# import torch.distributed as dist
+from grad_cam_utils import *
+
 
 if data_config.rand_seed > 0:
     init_rand_seed(data_config.rand_seed)
@@ -39,7 +40,16 @@ class trainer:
         mkdir(self.config.model_path)
         mkdir(self.config.model_path + "log/")
         writer = torch.utils.tensorboard.SummaryWriter(self.config.model_path + "log/")
+        writer.add_graph(model.module, torch.rand(1, 3, 256, 256).cuda())
         info = data_config()
+        if data_config.resume:  # contin = True continue training
+            path_checkpoint = '%s/checkpoint/ckpt_best_%d.pth' % (data_config.model_path, data_config.last_epoch)  # 断点路径
+            checkpoint = torch.load(path_checkpoint)  # 加载断点
+            model.load_state_dict(checkpoint['net'])  # 加载模型可学习参数
+            optimizer.load_state_dict(checkpoint['optimizer'])  # 加载优化器参数
+            start = checkpoint['epoch']  # 读取上次的epoch
+            print(start)
+            print('start epoch: ', data_config.last_epoch + 1)
         with open(data_config.model_path + "info.txt", "w") as w:
             for each in info.__dir__():
                 attr_name = each
@@ -77,7 +87,6 @@ class trainer:
             print("epoch: ", epoch)
             print("loss: ", train_loss / len(train_loader))
             print("accuracy:", train_acc / len(train_loader))
-
             eval_losses = []
             eval_acces = []
             eval_loss = 0
@@ -99,6 +108,20 @@ class trainer:
             writer.add_figure("Confusion matrix valid",
                               cf_metrics(valid_loader, self.model, False),
                               epoch)
+            # target_layers = [model.module.exit_flow.conv]
+            # for batch_idx, (features, targets) in enumerate(train_loader):
+            #     if batch_idx == 0:
+            #         input = torch.unsqueeze(features[0], dim=0)
+            #         writer.add_image('raw', input[0], epoch, dataformats="CHW")
+            #         cam = GradCAM(model=model, target_layers=target_layers, use_cuda=True)
+            #         for target in range(data_config.num_class):
+            #             grayscale_cam = cam(input_tensor=input, target_category=target)
+            #             grayscale_cam = grayscale_cam[0, :]
+            #             img = np.zeros((3, 256, 256))
+            #             visualization = show_cam_on_image(img.astype(dtype=np.float32),
+            #                                               grayscale_cam,
+            #                                               use_rgb=True)
+            #             writer.add_image('%d grad-cam' % target, visualization, epoch, dataformats="HWC")
             eval_losses.append(eval_loss / len(test_loader))
             eval_acces.append(eval_acc / len(test_loader))
             writer.add_scalar('Testing loss by steps', eval_loss / len(test_loader), epoch)
@@ -107,12 +130,12 @@ class trainer:
             print("test_acc:" + str(eval_acc / len(test_loader)) + '\n')
             checkpoint = {
                 "net": self.model.state_dict(),
-                'optimizer': self.loss_func.state_dict(),
+                'optimizer': self.optimizer.state_dict(),
                 "epoch": epoch
             }
             mkdir('%s/checkpoint' % self.config.model_path)
             torch.save(checkpoint, '%s/checkpoint/ckpt_best_%s.pth' % (self.config.model_path, str(epoch)))
-            torch.save(self.model, '%s/model_%d.model' % (self.config.model_path, epoch))
+            torch.save(self.model.module, '%s/model_%d.pt' % (self.config.model_path, epoch))
 
 
 # dist.init_process_group(backend='nccl')
@@ -151,7 +174,6 @@ optimizer = eval(data_config.optimizer)(model.parameters(), **data_config.optimi
 Trainer = trainer(loss_func=loss_func, model=model, optimizer=optimizer, config=data_config)
 Trainer.train(train_loader=train_loader, test_loader=test_loader, valid_loader=valid_loader)
 
-#
 # from torch import optim
 # from torch import nn
 # import torch
