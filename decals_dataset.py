@@ -17,8 +17,6 @@ class DecalsDataset(Dataset):
     def __getitem__(self, index):
         path, label = self.imgs[index]
         img = load_img(path, transform=self.transform)
-        # if 1 in np.isnan(img):
-        #     print(img)
         return np.nan_to_num(img), np.array(int(label))
 
     def __len__(self):

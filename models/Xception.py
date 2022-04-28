@@ -1,12 +1,3 @@
-"""xception in pytorch
-
-
-[1] François Chollet
-
-    Xception: Deep Learning with Depthwise Separable Convolutions
-    https://arxiv.org/abs/1610.02357
-"""
-
 from args import *
 import torch.nn as nn
 
