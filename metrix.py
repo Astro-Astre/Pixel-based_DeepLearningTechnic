@@ -3,7 +3,7 @@ import torch
 
 
 def cf_metrics(loader, model, save: bool = False):
-    y_pred = []  # save predction
+    y_pred = []  # save prediction
     y_true = []  # save ground truth
     device = "cuda:0"
     for inputs, labels in loader:
