@@ -19,7 +19,7 @@ from torch.utils.data import DataLoader
 from decals_dataset import *
 from preprocess.data_handle import *
 from grad_cam_utils import *
-
+from models.data_parallel import *
 
 if data_config.rand_seed > 0:
     init_rand_seed(data_config.rand_seed)
@@ -153,7 +153,8 @@ valid_loader = DataLoader(dataset=valid_data, batch_size=data_config.batch_size,
 model = eval(data_config.model_name)(**data_config.model_parm)
 model = model.cuda()
 device_ids = [0, 1]
-model = torch.nn.DataParallel(model, device_ids=device_ids)
+# model = torch.nn.DataParallel(model, device_ids=device_ids)
+model = BalancedDataParallel(12, model, dim=0, device_ids=[0, 1])
 
 loss_func = eval(data_config.loss_func)(**data_config.loss_func_parm)
 optimizer = eval(data_config.optimizer)(model.parameters(), **data_config.optimizer_parm)
