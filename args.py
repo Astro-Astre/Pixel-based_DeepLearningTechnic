@@ -1,6 +1,6 @@
 import os
+from data_handle import *
 import torchvision.transforms as transforms
-from preprocess.data_handle import *
 
 '''
 训练参数设置
@@ -19,23 +19,22 @@ class data_config:
     model_parm = {}  # 模型参数
     '''***********- dataset and directory -*************'''
     root_path = '/data/renhaoye/decals_2022/'  # 根目录
-    train_file = '/data/renhaoye/decals_2022/train-CLASS_7_2-STF.txt'  # 训练集txt文件
-    valid_file = '/data/renhaoye/decals_2022/valid-CLASS_7_2-STF.txt'  # 验证集txt文件
-    test_file = '/data/renhaoye/decals_2022/test-CLASS_7_2-STF.txt'  # 测试集txt文件
+    train_file = '/data/renhaoye/decals_2022/dataset_txt/sdss-CLASS_7-BEST-train.txt'  # 训练集txt文件
+    valid_file = '/data/renhaoye/decals_2022/dataset_txt/sdss-CLASS_7-BEST-valid.txt'  # 验证集txt文件
+    test_file = '/data/renhaoye/decals_2022/dataset_txt/sdss-CLASS_7-BEST-test.txt'  # 测试集txt文件
     transfer = transforms.Compose([transforms.ToTensor()])
 
     '''***********- Hyper Arguments -*************'''
-    WORKERS = 20  # dataloader进程数量
+    WORKERS = 12  # dataloader进程数量
     epochs = 100  # 训练总epoch
-    batch_size = 32  # 批处理大小
+    batch_size = 24  # 批处理大小
     gamma = 2  # focal_loss超参数
     rand_seed = 1926  # 随机种子
     lr = 0.0001  # 学习率
     momentum = 0.9  # SGD的动量设置
-    # weight = get_weight([23424, 24737, 26559, 21502, 12813, 9650, 31425, 11424, 13088])  # 9
-    # weight = get_weight([23424, 24737, 26559, 21502, 51516, 31245, 11424, 13088])  # 8
-    weight = get_weight([13536, 24737, 26559, 17685, 11540, 14813, 6720])  # 7,threshold2, focal_loss超参数
+    # weight = get_weight([13536, 24737, 26559, 17685, 11540, 14813, 6720])  # 7,threshold2, focal_loss超参数
     # weight = get_weight([23424, 24737, 26559, 21502, 11540, 14813, 13088])  # 7,threshold_c
+    weight = get_weight([4*2283, 16972, 18245, 11842, 7529, 9991, 4*1122])  # sdss_weight
     # optimizer = "torch.optim.Adam"
     optimizer = "torch.optim.AdamW"  # 优化器方法名称，eval()调用
     optimizer_parm = {'lr': lr, 'weight_decay': 0.01}  # 优化器参数
@@ -46,10 +45,10 @@ class data_config:
     device = "cuda:0"  # gpu
     # local_rank = 0, 1
     multi_gpu = False  # 多卡设置
-    other = "graduation_weightdecay0.01"  # 模型保存文件夹备注
+    other = "sdss_best"  # 模型保存文件夹备注
     model_path = root_path + 'trained_model/%s-LR_%s-LOSS_%s-CLASS_%s-BATCHSIZE_%s-OPTIM_%s-OTHER_%s/' \
                  % (model_name, str(lr), loss_func, str(num_class), str(batch_size), optimizer, other)
-    metrix_save_path = "/data/renhaoye/decals_2022/sdss_all.jpg"
+    metrix_save_path = "/data/renhaoye/decals_2022/decals_train—3.jpg"
     # classes = (
     #     "merger", "smoothRounded", "smoothInBetween", "smoothCigarShaped",
     #     "edgeOn", "diskNoWeakBar", "diskStrongBar")

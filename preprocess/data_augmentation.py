@@ -14,7 +14,7 @@ PIXEL = 5
 DEGREE = 30
 
 
-def augmentation(i, rows):
+def augmentation(i, rows, ):
     dst_dir = SAVE_PATH + "in_decals/augmentation_all/"  # 目标存放文件夹
     img_name = rows[i][1] + "_" + rows[i][2]  # 图像名：ra_dec
     src_dir = "/data/renhaoye/decals_2022/in_decals/fits/"  # 原始路径
