@@ -20,6 +20,7 @@ from decals_dataset import *
 from preprocess.data_handle import *
 from grad_cam_utils import *
 from models.data_parallel import *
+import pickle as pkl
 
 if data_config.rand_seed > 0:
     init_rand_seed(data_config.rand_seed)
@@ -39,6 +40,7 @@ class trainer:
         start = -1
         mkdir(self.config.model_path)
         mkdir(self.config.model_path + "log/")
+        mkdir(self.config.model_path + "cfm/")
         writer = torch.utils.tensorboard.SummaryWriter(self.config.model_path + "log/")
         writer.add_graph(model.module, torch.rand(1, 3, 256, 256).cuda())
         info = data_config()
@@ -81,7 +83,8 @@ class trainer:
                 # print(prof.key_averages().table(sort_by="gpu_time_total", row_limit=10))
             writer.add_scalar('Training loss by steps', train_loss / len(train_loader), epoch)
             writer.add_scalar('Training accuracy by steps', train_acc / len(train_loader), epoch)
-            writer.add_figure("Confusion matrix", cf_metrics(train_loader, self.model, False), epoch)
+
+            # writer.add_figure("Confusion matrix", cf_metrics(train_loader, self.model, False), epoch)
             losses.append(train_loss / len(train_loader))
             acces.append(100 * train_acc / len(train_loader))
             print("epoch: ", epoch)
@@ -105,8 +108,11 @@ class trainer:
                     num_correct = (pred == label).sum()
                     acc = int(num_correct) / X.shape[0]
                     eval_acc += acc
-            writer.add_figure("Confusion matrix valid",
-                              cf_metrics(valid_loader, self.model, False),
+            cfm = cf_m(valid_loader, self.model)
+            with open(self.config.model_path + "cfm/epoch_%d_test.dat" % epoch, "wb") as w:
+                pkl.dump(cfm, w)
+            writer.add_figure("Confusion matrix test",
+                              cf_map(cfm),
                               epoch)
             # target_layers = [model.module.exit_flow.conv]
             # for batch_idx, (features, targets) in enumerate(train_loader):

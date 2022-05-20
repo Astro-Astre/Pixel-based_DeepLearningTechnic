@@ -27,13 +27,13 @@ def get_grad_cam(model, target_layers, img, true_class):
 
 if __name__ == '__main__':
     # model = eval(data_config.model_name)(**data_config.model_parm)
-    PATH = "/data/renhaoye/decals_2022/trained_model/x_ception-LR_0.0001-LOSS_focal_loss-CLASS_7-BATCHSIZE_32-OPTIM_torch.optim.AdamW-OTHER_real/model_5.pt"
+    PATH = "/data/renhaoye/decals_2022/trained_model/x_ception-LR_0.0001-LS_focal_loss-CLS_7-BSZ_32-OPT_AdamW-BEST_2/model_6.pt"
     device = torch.device('cuda:0')
     with open(PATH, 'rb') as f:
         buffer = io.BytesIO(f.read())
         model = torch.load(buffer, map_location=device)
     target_layers = [model.exit_flow.conv]
-    path = "/data/renhaoye/decals_2022/in_decals/augmentation_all/"
+    path = "/data/renhaoye/decals_2022/in_decals/decals_best/"
     files = os.listdir(path)
     i = 0
     # img = load_img(path + "122.541511_20.486553.fits", None)
@@ -89,7 +89,7 @@ if __name__ == '__main__':
 
     diskStrongBar_train, diskStrongBar_test = train_test_split(diskStrongBar, test_size=0.1, random_state=1926)
     diskStrongBar_train, diskStrongBar_valid = train_test_split(diskStrongBar_train, test_size=0.1, random_state=1926)
-    num = 50
+    num = 20
     row_gap = np.ones((4, (data_config.num_class + 1) * 256 + (data_config.num_class + 1 - 1) * 4, 3))
     col_gap = np.ones((256, 4, 3))
     row_output = None

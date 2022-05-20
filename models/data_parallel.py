@@ -5,12 +5,6 @@ from torch.nn.parallel.parallel_apply import parallel_apply
 
 
 def scatter(inputs, target_gpus, chunk_sizes, dim=0):
-    r"""
-    Slices tensors into approximately equal chunks and
-    distributes them across given GPUs. Duplicates
-    references to objects that are not tensors.
-    """
-
     def scatter_map(obj):
         if isinstance(obj, torch.Tensor):
             try:
@@ -28,11 +22,6 @@ def scatter(inputs, target_gpus, chunk_sizes, dim=0):
             return list(map(type(obj), zip(*map(scatter_map, obj.items()))))
         return [obj for targets in target_gpus]
 
-    # After scatter_map is called, a scatter_map cell will exist. This cell
-    # has a reference to the actual function scatter_map, which has references
-    # to a closure that has a reference to the scatter_map cell (because the
-    # fn is recursive). To avoid this reference cycle, we set the function to
-    # None, clearing the cell
     try:
         return scatter_map(inputs)
     finally:
@@ -40,7 +29,6 @@ def scatter(inputs, target_gpus, chunk_sizes, dim=0):
 
 
 def scatter_kwargs(inputs, kwargs, target_gpus, chunk_sizes, dim=0):
-    r"""Scatter with support for kwargs dictionary"""
     inputs = scatter(inputs, target_gpus, chunk_sizes, dim) if inputs else []
     kwargs = scatter(kwargs, target_gpus, chunk_sizes, dim) if kwargs else []
     if len(inputs) < len(kwargs):

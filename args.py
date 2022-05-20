@@ -12,13 +12,14 @@ class data_config:
     num_class = 7  # 类别储量，还要对应改weight，classes
     resume = False  # 断点续训
     last_epoch = 6  # 从哪个epoch开始训练
-    model_name = "x_ception"  # 模型方法名，eval()调用，
+    # model_name = "x_ception"  # 模型方法名，eval()调用，
+    model_name = "swin"  # 模型方法名，eval()调用，
     # model_parm = {'input_channels': input_channel, 'num_class': num_class}
     model_parm = {}  # 模型参数
     '''***********- dataset and directory -*************'''
     root_path = '/data/renhaoye/decals_2022/'  # 根目录
     origin = "decals"
-    name = "baseline"
+    name = "BEST"
     train_file = '/data/renhaoye/decals_2022/dataset_txt/%s-CLASS_7-%s-train.txt' % (origin, name)  # 训练集txt文件
     valid_file = '/data/renhaoye/decals_2022/dataset_txt/%s-CLASS_7-%s-valid.txt' % (origin, name)  # 验证集txt文件
     test_file = '/data/renhaoye/decals_2022/dataset_txt/%s-CLASS_7-%s-test.txt' % (origin, name)  # 测试集txt文件
@@ -26,7 +27,7 @@ class data_config:
 
     '''***********- Hyper Arguments -*************'''
     WORKERS = 12  # dataloader进程数量
-    epochs = 50  # 训练总epoch
+    epochs = 30  # 训练总epoch
     batch_size = 32  # 批处理大小
     gamma = 2  # focal_loss超参数
     rand_seed = 1926  # 随机种子
@@ -46,10 +47,10 @@ class data_config:
     device = "cuda:0"  # gpu
     # local_rank = 0, 1
     multi_gpu = False  # 多卡设置
-    other = "test"  # 模型保存文件夹备注
+    other = "swinT"  # 模型保存文件夹备注
     model_path = root_path + 'trained_model/%s-LR_%s-LS_%s-CLS_%s-BSZ_%s-OPT_%s-%s/' \
                  % (model_name, str(lr), loss_func, str(num_class), str(batch_size), optimizer.split(".")[-1], other)
-    metrix_save_path = "/data/renhaoye/decals_2022/decals_train—3.jpg"
+    metrix_save_path = "/data/renhaoye/decals_2022/sdss_pred_newFL.jpg"
     classes = (
-        "merger", "Rounded", "InBetween", "CigarShaped",
-        "edgeOn", "diskNoBar", "diskStrongBar")  # 类别名称
+        "merger", "round", "between", "cigar",
+        "edgeOn", "noBar", "strongBar")  # 类别名称
