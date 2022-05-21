@@ -21,7 +21,7 @@ DATA_PATH = "/data/renhaoye/decals_2022/out_decals/scaled/"
 def pred(i, rows, w):
     data = load_img(DATA_PATH + rows[i], transform=None)
     x = torch.from_numpy(data)
-    y = model(x.to("cuda:1").unsqueeze(0))
+    y = model(x.to("cuda:0").unsqueeze(0))
     pred = (torch.max(torch.exp(y), 1)[1]).data.cpu().numpy()
     w.writelines(str(rows[i]) + " " + str(pred)[1] + "\n")
 
@@ -30,10 +30,10 @@ if __name__ == '__main__':
     if data_config.rand_seed > 0:
         init_rand_seed(data_config.rand_seed)
     out_decals = os.listdir(DATA_PATH)
-    torch.cuda.set_device("cuda:1")
+    # torch.cuda.set_device("cuda:0")
     model = torch.load(MODEL_PATH)
     device_ids = [0, 1]
-    model.to("cuda:1")
+    model.to("cuda:0")
     # model = torch.nn.DataParallel(model, device_ids=device_ids)
     model.eval()
     with open("/data/renhaoye/decals_2022/test.txt", "w+") as w:
