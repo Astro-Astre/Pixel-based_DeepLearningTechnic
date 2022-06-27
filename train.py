@@ -25,7 +25,7 @@ import pickle as pkl
 if data_config.rand_seed > 0:
     init_rand_seed(data_config.rand_seed)
 
-
+torch.nn.CrossEntropyLoss
 class trainer:
     def __init__(self, loss_func, model, optimizer, config):
         self.loss_func = loss_func

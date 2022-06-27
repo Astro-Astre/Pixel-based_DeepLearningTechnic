@@ -23,7 +23,20 @@ def pred(i, rows, w):
     x = torch.from_numpy(data)
     y = model(x.to("cuda:0").unsqueeze(0))
     pred = (torch.max(torch.exp(y), 1)[1]).data.cpu().numpy()
-    w.writelines(str(rows[i]) + " " + str(pred)[1] + "\n")
+    pred2 = F.softmax(torch.Tensor(y.cpu()), dim=1).detach().numpy()[0]
+    prob = pred2[np.argmax(pred2)]
+    w.writelines(str(rows[i].split("_")[0]) + " " +
+                 str(rows[i].split("_")[1]) + " " +
+                 str(rows[i]) + " " +
+                 str(pred)[1] + " " +
+                 str(prob) + " " +
+                 str(pred2[0]) + " " +
+                 str(pred2[1]) + " " +
+                 str(pred2[2]) + " " +
+                 str(pred2[3]) + " " +
+                 str(pred2[4]) + " " +
+                 str(pred2[5]) + " " +
+                 str(pred2[6]) + "\n")
 
 
 if __name__ == '__main__':
@@ -36,11 +49,11 @@ if __name__ == '__main__':
     model.to("cuda:0")
     # model = torch.nn.DataParallel(model, device_ids=device_ids)
     model.eval()
-    with open("/data/renhaoye/decals_2022/test.txt", "w+") as w:
-        w.writelines("loc label\n")
-    w = open("/data/renhaoye/decals_2022/test.txt", "a")
-    # for i in range(len(out_decals)):
-    for i in range(10):
+    with open("/data/renhaoye/decals_2022/out_decals_prob7.txt", "w+") as w:
+        w.writelines("ra dec loc label prob prob_0 prob_1 prob_2 prob_3 prob_4 prob_5 prob_6\n")
+    w = open("/data/renhaoye/decals_2022/out_decals_prob7.txt", "a")
+    for i in range(len(out_decals)):
+    # for i in range(10):
         pred(i, out_decals, w)
     w.close()
     # index = []
