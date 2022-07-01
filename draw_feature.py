@@ -110,8 +110,8 @@ if __name__ == '__main__':
             for col in range(data_config.num_class):
                 col_result, _ = get_grad_cam(model, target_layers, img, col)
                 if true == col:
-                    cv2.putText(col_result, "pred", (0, 250), cv2.FONT_ITALIC, 1., (1, 1, 1), 1)
-                cv2.putText(col_result, str(pred[0][col])[:5] + "%", poi, cv2.FONT_ITALIC, 1., (1, 1, 1), 1)
+                    cv2.putText(col_result, "pred", (0, 250), cv2.FONT_ITALIC, 1., (1, 1, 1), 1.1)
+                cv2.putText(col_result, str(pred[0][col])[:5] + "%", poi, cv2.FONT_ITALIC, 1., (1, 1, 1), 1.1)
                 if col == 0:
                     col_output = np.concatenate((chw2hwc(img), col_gap, col_result), axis=1)
                 else:
